@@ -1,0 +1,2758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RAGA — Write Beyond Words</title>
+<meta name="description" content="AI-Powered Rap & Songwriting Studio. Elite-level lyrics powered by a 10-stage generation pipeline." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg-deep: #050507;
+    --bg-charcoal: #0c0c10;
+    --bg-surface: #121218;
+    --bg-elevated: #1a1a22;
+    --bg-hover: #22222c;
+    --accent: #a855f7;
+    --accent-bright: #c084fc;
+    --accent-dim: #7c3aed;
+    --neon-blue: #38bdf8;
+    --neon-blue-dim: #0ea5e9;
+    --success: #4ade80;
+    --warning: #fbbf24;
+    --text-primary: #f4f4f5;
+    --text-secondary: #a1a1aa;
+    --text-muted: #71717a;
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.12);
+    --glow-purple: 0 0 40px rgba(168,85,247,0.25);
+    --glow-blue: 0 0 40px rgba(56,189,248,0.2);
+    --radius: 12px;
+    --radius-lg: 16px;
+    --sidebar-w: 260px;
+    --right-w: 340px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg-deep); color: var(--text-primary);
+    line-height: 1.5; overflow-x: hidden; min-height: 100vh;
+  }
+  ::selection { background: rgba(168,85,247,0.4); color: #fff; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input, textarea, select { font-family: inherit; color: inherit; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+  .hidden { display: none !important; }
+  .glow-text {
+    background: linear-gradient(135deg, #fff 0%, var(--accent-bright) 50%, var(--neon-blue) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  /* Landing */
+  #landing { min-height: 100vh; position: relative; overflow: hidden; }
+  .landing-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(168,85,247,0.15), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 60%, rgba(56,189,248,0.08), transparent),
+      radial-gradient(ellipse 50% 30% at 20% 80%, rgba(168,85,247,0.06), transparent),
+      var(--bg-deep);
+  }
+  .waveform-canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.35; pointer-events: none; }
+  .floating-lyrics { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .lyric-frag {
+    position: absolute; font-size: 13px; color: rgba(255,255,255,0.08);
+    font-weight: 500; white-space: nowrap; animation: floatLyric linear infinite;
+  }
+  @keyframes floatLyric {
+    0% { transform: translateY(100vh) rotate(-5deg); opacity: 0; }
+    10% { opacity: 1; } 90% { opacity: 1; }
+    100% { transform: translateY(-100px) rotate(5deg); opacity: 0; }
+  }
+  .landing-nav {
+    position: relative; z-index: 10; display: flex; align-items: center;
+    justify-content: space-between; padding: 1.25rem 2.5rem; max-width: 1400px; margin: 0 auto;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 0.75rem;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.35rem; letter-spacing: -0.02em;
+  }
+  .logo-mark {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--neon-blue) 100%);
+    display: flex; align-items: center; justify-content: center; box-shadow: var(--glow-purple);
+  }
+  .logo-mark svg { width: 20px; height: 20px; }
+  .nav-links { display: flex; align-items: center; gap: 2rem; }
+  .nav-links a { font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); transition: color var(--transition); }
+  .nav-links a:hover { color: var(--text-primary); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    padding: 0.7rem 1.4rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600;
+    transition: all var(--transition); white-space: nowrap;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dim) 100%);
+    color: #fff; box-shadow: 0 4px 20px rgba(168,85,247,0.35);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(168,85,247,0.45); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-secondary {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border-hover); color: var(--text-primary);
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+  .btn-ghost { color: var(--text-secondary); }
+  .btn-ghost:hover { color: var(--text-primary); }
+  .btn-lg { padding: 1rem 2rem; font-size: 1rem; border-radius: 12px; }
+  .btn-icon {
+    width: 36px; height: 36px; padding: 0; border-radius: 10px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .btn-icon:hover { background: rgba(255,255,255,0.1); }
+  .btn-sm { padding: 0.4rem 0.85rem; font-size: 0.8rem; border-radius: 8px; }
+  .hero {
+    position: relative; z-index: 5; max-width: 1000px; margin: 0 auto;
+    padding: 5rem 2rem 3rem; text-align: center;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem;
+    border-radius: 100px; background: rgba(168,85,247,0.1);
+    border: 1px solid rgba(168,85,247,0.25); font-size: 0.8rem; font-weight: 500;
+    color: var(--accent-bright); margin-bottom: 2rem; animation: fadeUp 0.8s ease both;
+  }
+  .hero-badge .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 8px var(--accent); animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.2)} }
+  .hero h1 {
+    font-family: 'Space Grotesk', sans-serif; font-size: clamp(3.5rem, 10vw, 7rem);
+    font-weight: 700; letter-spacing: -0.04em; line-height: 1; margin-bottom: 1rem;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+  .hero-subtitle {
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem); font-weight: 500; color: var(--text-secondary);
+    margin-bottom: 1.25rem; animation: fadeUp 0.8s 0.2s ease both;
+  }
+  .hero-desc {
+    max-width: 580px; margin: 0 auto 2.5rem; font-size: 1.05rem; color: var(--text-muted);
+    line-height: 1.7; animation: fadeUp 0.8s 0.3s ease both;
+  }
+  .hero-ctas {
+    display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .pipeline-preview {
+    position: relative; z-index: 5; max-width: 1100px; margin: 0 auto; padding: 2rem 2rem 4rem;
+  }
+  .pipeline-track { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; }
+  .pipe-step {
+    flex: 0 0 auto; min-width: 110px; text-align: center; padding: 0.85rem 0.6rem;
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px;
+  }
+  .pipe-step:hover { border-color: rgba(168,85,247,0.35); }
+  .pipe-num { font-size: 0.65rem; font-weight: 700; color: var(--accent-bright); letter-spacing: 0.08em; margin-bottom: 0.3rem; }
+  .pipe-name { font-size: 0.75rem; font-weight: 500; color: var(--text-secondary); }
+  .features-section {
+    position: relative; z-index: 5; max-width: 1200px; margin: 0 auto; padding: 2rem 2rem 6rem;
+  }
+  .section-label {
+    font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--accent-bright); margin-bottom: 0.75rem; text-align: center;
+  }
+  .section-title {
+    font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 700; letter-spacing: -0.03em; text-align: center; margin-bottom: 3rem;
+  }
+  .features-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem;
+  }
+  .feature-card {
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1.75rem; transition: all var(--transition); position: relative; overflow: hidden;
+  }
+  .feature-card:hover {
+    border-color: rgba(168,85,247,0.3); transform: translateY(-4px); box-shadow: var(--glow-purple);
+  }
+  .feature-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(56,189,248,0.1));
+    border: 1px solid rgba(168,85,247,0.2); display: flex; align-items: center;
+    justify-content: center; margin-bottom: 1.25rem; color: var(--accent-bright);
+  }
+  .feature-icon svg { width: 24px; height: 24px; }
+  .feature-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .feature-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; }
+
+  /* App */
+  #app { display: none; min-height: 100vh; }
+  #app.active { display: flex; }
+  .sidebar {
+    width: var(--sidebar-w); min-width: var(--sidebar-w); height: 100vh; position: sticky; top: 0;
+    background: var(--bg-charcoal); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; z-index: 50;
+  }
+  .sidebar-header { padding: 1.25rem 1.25rem 1rem; border-bottom: 1px solid var(--border); }
+  .sidebar-nav { flex: 1; padding: 1rem 0.75rem; overflow-y: auto; }
+  .nav-group-label {
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--text-muted); padding: 0.5rem 0.75rem; margin-top: 0.5rem;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.75rem;
+    border-radius: 10px; font-size: 0.9rem; font-weight: 500; color: var(--text-secondary);
+    transition: all var(--transition); margin-bottom: 2px; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text-primary); }
+  .nav-item.active {
+    background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(168,85,247,0.05));
+    color: var(--accent-bright); border: 1px solid rgba(168,85,247,0.2);
+  }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.8; }
+  .nav-item.active svg { opacity: 1; }
+  .sidebar-footer { padding: 1rem; border-top: 1px solid var(--border); }
+  .upgrade-banner {
+    background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(56,189,248,0.08));
+    border: 1px solid rgba(168,85,247,0.25); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;
+  }
+  .upgrade-banner h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem; }
+  .upgrade-banner p { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+  .storage-bar { margin-bottom: 1rem; }
+  .storage-bar .label {
+    display: flex; justify-content: space-between; font-size: 0.75rem;
+    color: var(--text-muted); margin-bottom: 0.4rem;
+  }
+  .progress-track { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+  .progress-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--neon-blue)); transition: width 0.6s ease;
+  }
+  .user-chip {
+    display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border-radius: 10px;
+  }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--neon-blue));
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;
+  }
+  .user-info .name { font-size: 0.85rem; font-weight: 600; }
+  .user-info .plan { font-size: 0.7rem; color: var(--text-muted); }
+  .main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; height: 100vh; }
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.5rem;
+    border-bottom: 1px solid var(--border); background: rgba(5,5,7,0.8);
+    backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 40;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 1rem; }
+  .page-title {
+    font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 600; letter-spacing: -0.02em;
+  }
+  .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+  .search-box {
+    display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem;
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px; width: 220px;
+  }
+  .search-box input {
+    background: none; border: none; outline: none; font-size: 0.85rem; width: 100%; color: var(--text-primary);
+  }
+  .search-box input::placeholder { color: var(--text-muted); }
+  .search-box svg { width: 16px; height: 16px; color: var(--text-muted); flex-shrink: 0; }
+  .workspace { flex: 1; display: flex; overflow: hidden; }
+  .center-panel { flex: 1; overflow-y: auto; padding: 1.5rem; min-width: 0; }
+  .right-panel {
+    width: var(--right-w); min-width: var(--right-w); border-left: 1px solid var(--border);
+    background: var(--bg-charcoal); overflow-y: auto; padding: 1.25rem;
+  }
+
+  /* Prompt */
+  .prompt-area {
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1.5rem; margin-bottom: 1rem; transition: border-color var(--transition);
+  }
+  .prompt-area:focus-within {
+    border-color: rgba(168,85,247,0.4); box-shadow: 0 0 0 3px rgba(168,85,247,0.1);
+  }
+  .prompt-area textarea {
+    width: 100%; min-height: 90px; background: none; border: none; outline: none;
+    resize: vertical; font-size: 1rem; line-height: 1.6; color: var(--text-primary);
+  }
+  .prompt-area textarea::placeholder { color: var(--text-muted); }
+  .prompt-actions { display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap; align-items: center; }
+
+  /* Prompt Analyzer Result */
+  .intent-panel {
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1.25rem; margin-bottom: 1.25rem; display: none;
+  }
+  .intent-panel.visible { display: block; animation: fadeUp 0.4s ease both; }
+  .intent-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;
+  }
+  .intent-header h3 {
+    font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .intent-header h3 span {
+    font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--neon-blue); background: rgba(56,189,248,0.12); padding: 0.2rem 0.5rem; border-radius: 4px;
+  }
+  .confidence-badge {
+    font-size: 0.75rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 100px;
+    background: rgba(74,222,128,0.12); color: var(--success); border: 1px solid rgba(74,222,128,0.25);
+  }
+  .confidence-badge.mid { background: rgba(251,191,36,0.12); color: var(--warning); border-color: rgba(251,191,36,0.25); }
+  .confidence-badge.low { background: rgba(248,113,113,0.12); color: #f87171; border-color: rgba(248,113,113,0.25); }
+  .intent-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem;
+  }
+  .intent-chip {
+    background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px;
+    padding: 0.65rem 0.85rem;
+  }
+  .intent-chip .key {
+    font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text-muted); margin-bottom: 0.2rem;
+  }
+  .intent-chip .val {
+    font-size: 0.88rem; font-weight: 600; color: var(--text-primary);
+  }
+  .intent-chip .val.tag {
+    display: inline-block; background: rgba(168,85,247,0.15); color: var(--accent-bright);
+    padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.8rem;
+  }
+  .intent-emotions {
+    display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.15rem;
+  }
+  .intent-emotions span {
+    font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 4px;
+    background: rgba(56,189,248,0.12); color: var(--neon-blue);
+  }
+  .intent-json-toggle {
+    margin-top: 0.85rem; font-size: 0.75rem; color: var(--text-muted); cursor: pointer;
+  }
+  .intent-json-toggle:hover { color: var(--accent-bright); }
+  .intent-json {
+    display: none; margin-top: 0.75rem; padding: 1rem; background: var(--bg-deep);
+    border-radius: 8px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.75rem;
+    color: var(--text-secondary); overflow-x: auto; white-space: pre; line-height: 1.5;
+  }
+  .intent-json.open { display: block; }
+
+  /* DNA */
+  .dna-panel {
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1.25rem; margin-bottom: 1.25rem;
+  }
+  .dna-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;
+  }
+  .dna-header h3 {
+    font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .dna-header h3 span {
+    font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--accent-bright); background: rgba(168,85,247,0.12); padding: 0.2rem 0.5rem; border-radius: 4px;
+  }
+  .dna-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.85rem;
+  }
+  .dna-control { display: flex; flex-direction: column; gap: 0.3rem; }
+  .dna-control label {
+    font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);
+  }
+  .dna-control select, .dna-control input[type="number"] {
+    background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.4rem 0.65rem; font-size: 0.82rem; outline: none;
+  }
+  .dna-control select:focus, .dna-control input:focus { border-color: rgba(168,85,247,0.5); }
+  .dna-slider { display: flex; flex-direction: column; gap: 0.25rem; }
+  .dna-slider .row { display: flex; justify-content: space-between; font-size: 0.75rem; }
+  .dna-slider .row span:last-child { font-weight: 600; color: var(--accent-bright); min-width: 28px; text-align: right; }
+  input[type="range"] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 5px;
+    background: rgba(255,255,255,0.08); border-radius: 3px; outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--neon-blue)); cursor: pointer;
+    box-shadow: 0 0 8px rgba(168,85,247,0.4);
+  }
+
+  .pipeline-status {
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1rem 1.25rem; margin-bottom: 1.25rem; display: none;
+  }
+  .pipeline-status.active { display: block; }
+  .pipeline-status h4 {
+    font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-muted); margin-bottom: 0.75rem;
+  }
+  .pipe-stages { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+  .pipe-stage {
+    font-size: 0.7rem; font-weight: 500; padding: 0.3rem 0.6rem; border-radius: 6px;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text-muted);
+    transition: all 0.3s ease;
+  }
+  .pipe-stage.running {
+    background: rgba(168,85,247,0.15); border-color: rgba(168,85,247,0.4); color: var(--accent-bright);
+    animation: pulse 1.2s ease infinite;
+  }
+  .pipe-stage.done {
+    background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.3); color: var(--success);
+  }
+
+  .stats-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 0.75rem; margin-bottom: 1.25rem;
+  }
+  .stat-pill {
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 0.75rem; text-align: center;
+  }
+  .stat-pill .val { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 700; }
+  .stat-pill .lbl { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.1rem; }
+
+  .output-section {
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden;
+  }
+  .output-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--border);
+  }
+  .output-header h3 { font-size: 0.95rem; font-weight: 600; }
+  .output-actions { display: flex; gap: 0.4rem; }
+  .lyrics-body {
+    padding: 1.5rem; font-size: 0.95rem; line-height: 1.9; white-space: pre-wrap;
+    min-height: 220px; color: var(--text-secondary);
+  }
+  .lyrics-body .verse-label {
+    color: var(--accent-bright); font-weight: 600; font-size: 0.78rem;
+    text-transform: uppercase; letter-spacing: 0.08em; margin: 1.25rem 0 0.5rem; display: block;
+  }
+  .lyrics-body .verse-label:first-child { margin-top: 0; }
+  .lyrics-body .bar { display: block; padding: 0.12rem 0; border-radius: 4px; }
+  .lyrics-body .bar:hover { background: rgba(168,85,247,0.06); }
+  .empty-state { text-align: center; padding: 3rem 1.5rem; color: var(--text-muted); }
+  .empty-state svg { width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.4; }
+  .empty-state p { font-size: 0.9rem; }
+
+  .panel-section-title {
+    font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--text-muted); margin-bottom: 0.85rem; margin-top: 1.25rem;
+  }
+  .panel-section-title:first-child { margin-top: 0; }
+  .metric-card {
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 0.85rem; margin-bottom: 0.6rem;
+  }
+  .metric-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+  .metric-name { font-size: 0.82rem; font-weight: 500; }
+  .metric-value { font-size: 0.88rem; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+  .metric-value.high { color: var(--success); }
+  .metric-value.mid { color: var(--neon-blue); }
+  .metric-value.low { color: var(--warning); }
+  .metric-bar { height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+  .metric-bar-fill { height: 100%; border-radius: 3px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+  .metric-bar-fill.purple { background: linear-gradient(90deg, var(--accent-dim), var(--accent-bright)); }
+  .metric-bar-fill.blue { background: linear-gradient(90deg, var(--neon-blue-dim), var(--neon-blue)); }
+  .metric-bar-fill.green { background: linear-gradient(90deg, #16a34a, #4ade80); }
+  .metric-bar-fill.amber { background: linear-gradient(90deg, #d97706, #fbbf24); }
+  .critic-overall {
+    background: linear-gradient(135deg, rgba(168,85,247,0.12), rgba(56,189,248,0.06));
+    border: 1px solid rgba(168,85,247,0.25); border-radius: var(--radius);
+    padding: 1rem; text-align: center; margin-bottom: 0.75rem;
+  }
+  .critic-overall .score {
+    font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700;
+    background: linear-gradient(135deg, var(--accent-bright), var(--neon-blue));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .critic-overall .label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+
+  .projects-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem;
+  }
+  .project-card {
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1.25rem; transition: all var(--transition); cursor: pointer;
+  }
+  .project-card:hover {
+    border-color: rgba(168,85,247,0.3); transform: translateY(-3px); box-shadow: var(--glow-purple);
+  }
+  .project-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+  .project-genre {
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--accent-bright); background: rgba(168,85,247,0.12); padding: 0.25rem 0.6rem; border-radius: 6px;
+  }
+  .project-card h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.35rem; }
+  .project-meta { font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 0.75rem; }
+  .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 0.35rem; }
+  .status-dot.draft { background: #fbbf24; }
+  .status-dot.complete { background: #4ade80; }
+  .status-dot.in-progress { background: var(--neon-blue); }
+
+  .kb-search { margin-bottom: 1.5rem; }
+  .kb-search input {
+    width: 100%; padding: 0.9rem 1.25rem; background: var(--bg-surface); border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 0.95rem; outline: none;
+  }
+  .kb-search input:focus { border-color: rgba(168,85,247,0.4); }
+  .kb-categories { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+  .kb-cat {
+    padding: 0.4rem 0.9rem; border-radius: 100px; font-size: 0.8rem; font-weight: 500;
+    background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-secondary);
+  }
+  .kb-cat:hover, .kb-cat.active {
+    background: rgba(168,85,247,0.15); border-color: rgba(168,85,247,0.3); color: var(--accent-bright);
+  }
+  .kb-list { display: flex; flex-direction: column; gap: 0.35rem; }
+  .kb-item {
+    display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem;
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius);
+    transition: all var(--transition); cursor: pointer;
+  }
+  .kb-item:hover { border-color: rgba(168,85,247,0.25); background: var(--bg-elevated); }
+  .kb-item-icon {
+    width: 40px; height: 40px; border-radius: 10px; background: rgba(168,85,247,0.1);
+    display: flex; align-items: center; justify-content: center; color: var(--accent-bright); flex-shrink: 0;
+  }
+  .kb-item-icon svg { width: 18px; height: 18px; }
+  .kb-item-content h4 { font-size: 0.95rem; font-weight: 600; }
+  .kb-item-content p { font-size: 0.8rem; color: var(--text-muted); }
+  .kb-folder {
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 0.55rem 0.75rem; cursor: pointer; transition: all var(--transition);
+    font-size: 0.85rem; font-weight: 500;
+  }
+  .kb-folder:hover, .kb-folder.active {
+    border-color: rgba(168,85,247,0.35); background: rgba(168,85,247,0.08); color: var(--accent-bright);
+  }
+  .kb-sub {
+    margin-left: 0.85rem; border-left: 1px solid var(--border); padding-left: 0.65rem;
+    display: none; flex-direction: column; gap: 0.25rem; margin-top: 0.25rem; margin-bottom: 0.35rem;
+  }
+  .kb-sub.open { display: flex; }
+  .kb-sub-item {
+    font-size: 0.78rem; padding: 0.4rem 0.6rem; border-radius: 6px; color: var(--text-secondary);
+    cursor: pointer; transition: all var(--transition);
+  }
+  .kb-sub-item:hover, .kb-sub-item.active {
+    background: rgba(255,255,255,0.05); color: var(--text-primary);
+  }
+  .kb-priority {
+    display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; padding: 0.15rem 0.45rem; border-radius: 4px; margin-left: 0.35rem;
+  }
+  .kb-priority.p1 { background: rgba(248,113,113,0.15); color: #f87171; }
+  .kb-priority.p2 { background: rgba(168,85,247,0.15); color: var(--accent-bright); }
+  .kb-priority.p3 { background: rgba(56,189,248,0.15); color: var(--neon-blue); }
+  .kb-priority.p4 { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+  @media (max-width: 800px) {
+    #kbLayout { grid-template-columns: 1fr !important; }
+  }
+
+  .settings-section {
+    background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 1.5rem; margin-bottom: 1.5rem;
+  }
+  .settings-section h3 {
+    font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .form-group { margin-bottom: 1.25rem; }
+  .form-group label {
+    display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.4rem; color: var(--text-secondary);
+  }
+  .form-group input, .form-group select {
+    width: 100%; padding: 0.65rem 1rem; background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: 8px; font-size: 0.9rem; outline: none;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: rgba(168,85,247,0.5); }
+  .slider-group { display: flex; flex-direction: column; gap: 0.35rem; }
+  .slider-header { display: flex; justify-content: space-between; font-size: 0.85rem; }
+  .slider-header span:last-child { font-weight: 600; color: var(--accent-bright); }
+
+  .mobile-menu-btn {
+    display: none; width: 40px; height: 40px; align-items: center; justify-content: center;
+    border-radius: 10px; background: rgba(255,255,255,0.05);
+  }
+  .mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 45; }
+  .mobile-overlay.show { display: block; }
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem; background: var(--bg-elevated);
+    border: 1px solid var(--border-hover); border-radius: 12px; padding: 1rem 1.25rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4); z-index: 100;
+    transform: translateY(120%); opacity: 0;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex; align-items: center; gap: 0.75rem; max-width: 360px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-icon { color: var(--accent-bright); }
+  .toast-msg { font-size: 0.9rem; font-weight: 500; }
+  .skeleton {
+    background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-hover) 50%, var(--bg-elevated) 75%);
+    background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px;
+  }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  @media (max-width: 1100px) {
+    .right-panel { display: none; }
+    :root { --right-w: 0; }
+  }
+  @media (max-width: 900px) {
+    .sidebar {
+      position: fixed; left: 0; top: 0; transform: translateX(-100%);
+      transition: transform 0.3s ease; z-index: 60;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .mobile-menu-btn { display: flex; }
+    .nav-links { display: none; }
+    .search-box { width: 140px; }
+    .landing-nav { padding: 1rem 1.25rem; }
+    .hero { padding: 4rem 1.25rem 2rem; }
+    .features-section, .pipeline-preview { padding-left: 1.25rem; padding-right: 1.25rem; }
+  }
+  @media (max-width: 600px) {
+    .hero-ctas { flex-direction: column; align-items: stretch; }
+    .hero-ctas .btn { width: 100%; }
+    .dna-grid, .intent-grid { grid-template-columns: 1fr 1fr; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .center-panel { padding: 1rem; }
+    .projects-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="landing">
+  <div class="landing-bg"></div>
+  <canvas class="waveform-canvas" id="waveCanvas"></canvas>
+  <div class="floating-lyrics" id="floatingLyrics"></div>
+  <nav class="landing-nav">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M4 12h2l2-6 3 12 2-6h3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      RAGA
+    </div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#pipeline">Pipeline</a>
+      <a href="#" onclick="enterApp(); return false;">Studio</a>
+      <button class="btn btn-primary" onclick="enterApp()">Launch Studio</button>
+    </div>
+  </nav>
+  <section class="hero">
+    <div class="hero-badge"><span class="dot"></span> Prompt Analyzer · Rap DNA · Critic AI</div>
+    <h1 class="glow-text">RAGA</h1>
+    <p class="hero-subtitle">AI-Powered Rap & Songwriting Studio</p>
+    <p class="hero-desc">Messy prompts become structured intent. Rap DNA, rhyme engines, Critic & Humanizer — lyrics that never sound AI-generated.</p>
+    <div class="hero-ctas">
+      <button class="btn btn-primary btn-lg" onclick="enterApp()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Generate Lyrics
+      </button>
+      <button class="btn btn-secondary btn-lg" onclick="enterApp()">Explore Studio</button>
+    </div>
+  </section>
+  <section class="pipeline-preview" id="pipeline">
+    <p class="section-label">Generation System</p>
+    <h2 class="section-title" style="margin-bottom:1.5rem;">10-Stage Pipeline</h2>
+    <div class="pipeline-track">
+      <div class="pipe-step"><div class="pipe-num">01</div><div class="pipe-name">Prompt Analyzer</div></div>
+      <div class="pipe-step"><div class="pipe-num">02</div><div class="pipe-name">Rap DNA Builder</div></div>
+      <div class="pipe-step"><div class="pipe-num">03</div><div class="pipe-name">Knowledge RAG</div></div>
+      <div class="pipe-step"><div class="pipe-num">04</div><div class="pipe-name">Blueprint</div></div>
+      <div class="pipe-step"><div class="pipe-num">05</div><div class="pipe-name">Lyrics Gen</div></div>
+      <div class="pipe-step"><div class="pipe-num">06</div><div class="pipe-name">Rhyme Engine</div></div>
+      <div class="pipe-step"><div class="pipe-num">07</div><div class="pipe-name">Critic AI</div></div>
+      <div class="pipe-step"><div class="pipe-num">08</div><div class="pipe-name">Humanizer</div></div>
+      <div class="pipe-step"><div class="pipe-num">09</div><div class="pipe-name">Scoring</div></div>
+      <div class="pipe-step"><div class="pipe-num">10</div><div class="pipe-name">Final Output</div></div>
+    </div>
+  </section>
+  <section class="features-section" id="features">
+    <p class="section-label">Capabilities</p>
+    <h2 class="section-title">Built for elite lyricists</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+        <h3>Prompt Analyzer</h3>
+        <p>Transforms messy requests into a structured Rap Intent Object with confidence scoring.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a10 10 0 0110 10c0 5.5-4.5 10-10 10S2 17.5 2 12 6.5 2 12 2z"/><path d="M12 6v6l4 2"/></svg></div>
+        <h3>Rap DNA System</h3>
+        <p>Genre, aggression, punchline density, cadence, wordplay — full stylistic control.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <h3>Critic AI</h3>
+        <p>Scores flow, punchlines, originality, naturalness, emotion, rhyme & hook strength.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <h3>Humanizer AI</h3>
+        <p>Strips AI patterns, injects real slang and conversational flow.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+        <h3>Rhyme Engine</h3>
+        <p>End, internal, multisyllabic, near & slant rhymes with density mapping.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/></svg></div>
+        <h3>Multi-Language</h3>
+        <p>English, Hinglish, Hindi, Punjabi, Urdu-influenced — natural code-switching.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="app">
+  <div class="mobile-overlay" id="mobileOverlay" onclick="closeSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M4 12h2l2-6 3 12 2-6h3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        RAGA
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <p class="nav-group-label">Workspace</p>
+      <button class="nav-item active" data-page="dashboard" onclick="navTo('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" data-page="studio" onclick="navTo('studio')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/></svg>
+        Studio
+      </button>
+      <button class="nav-item" data-page="projects" onclick="navTo('projects')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+        Projects
+      </button>
+      <button class="nav-item" data-page="templates" onclick="navTo('templates')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates
+      </button>
+      <p class="nav-group-label">Library</p>
+      <button class="nav-item" data-page="history" onclick="navTo('history')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        History
+      </button>
+      <button class="nav-item" data-page="favorites" onclick="navTo('favorites')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        Favorites
+      </button>
+      <button class="nav-item" data-page="knowledge" onclick="navTo('knowledge')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        Knowledge Base
+      </button>
+      <p class="nav-group-label">System</p>
+      <button class="nav-item" data-page="settings" onclick="navTo('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        Settings
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="upgrade-banner">
+        <h4>Upgrade to Pro</h4>
+        <p>Unlimited gens, advanced models, Critic + Humanizer priority.</p>
+        <button class="btn btn-primary" style="width:100%;padding:0.5rem;font-size:0.8rem;">Upgrade</button>
+      </div>
+      <div class="storage-bar">
+        <div class="label"><span>Storage</span><span>2.4 / 10 GB</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:24%"></div></div>
+      </div>
+      <div class="user-chip">
+        <div class="avatar">RK</div>
+        <div class="user-info">
+          <div class="name">Rap King</div>
+          <div class="plan">Free Plan</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search projects..." />
+        </div>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <div class="center-panel" id="centerPanel">
+
+        <div id="page-dashboard" class="page-view">
+          <div class="prompt-area">
+            <textarea id="promptInput" placeholder="Describe your track...&#10;&#10;Example: Write a dark Hinglish trap rap about betrayal and success. 140 BPM. Aggressive."></textarea>
+            <div class="prompt-actions">
+              <button class="btn btn-secondary" onclick="analyzePrompt()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                Analyze Prompt
+              </button>
+              <button class="btn btn-primary" id="genBtn" onclick="runPipeline()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                Generate
+              </button>
+            </div>
+          </div>
+
+          <!-- Prompt Analyzer Result -->
+          <div class="intent-panel" id="intentPanel">
+            <div class="intent-header">
+              <h3>Rap Intent Object <span>Prompt Analyzer</span></h3>
+              <span class="confidence-badge" id="confidenceBadge">—</span>
+            </div>
+            <div class="intent-grid" id="intentGrid"></div>
+            <div class="intent-json-toggle" onclick="toggleIntentJson()">▸ View full JSON</div>
+            <pre class="intent-json" id="intentJson"></pre>
+          </div>
+
+          <!-- Rap DNA -->
+          <div class="dna-panel">
+            <div class="dna-header">
+              <h3>Rap DNA <span>Builder</span></h3>
+              <button class="btn btn-sm btn-secondary" onclick="resetDNA()">Reset</button>
+            </div>
+            <div class="dna-grid">
+              <div class="dna-control">
+                <label>Genre</label>
+                <select id="dna-genre">
+                  <option>Trap</option><option>Drill</option><option>Boom Bap</option>
+                  <option>Conscious</option><option>Storytelling</option><option>Melodic</option>
+                  <option>Hardcore</option><option>Desi Hip Hop</option>
+                </select>
+              </div>
+              <div class="dna-control">
+                <label>Language</label>
+                <select id="dna-lang">
+                  <option>English</option><option>Hinglish</option><option>Hindi</option>
+                  <option>Punjabi</option><option>Urdu-Hindi</option>
+                </select>
+              </div>
+              <div class="dna-control">
+                <label>Mood</label>
+                <select id="dna-mood">
+                  <option>Aggressive</option><option>Dark</option><option>Confident</option>
+                  <option>Melancholic</option><option>Reflective</option><option>Uplifting</option>
+                  <option>Introspective</option>
+                </select>
+              </div>
+              <div class="dna-control">
+                <label>Hook Style</label>
+                <select id="dna-hook">
+                  <option>Chant</option><option>Melodic</option><option>Call & Response</option>
+                  <option>Minimal</option><option>Layered</option>
+                </select>
+              </div>
+              <div class="dna-control">
+                <label>BPM</label>
+                <input type="number" id="dna-bpm" value="140" min="60" max="200" />
+              </div>
+              <div class="dna-control">
+                <label>Length</label>
+                <select id="dna-length">
+                  <option>16 bars</option><option>8 bars</option><option>32 bars</option><option>Full song</option>
+                </select>
+              </div>
+              <div class="dna-slider">
+                <div class="row"><span>Energy</span><span id="v-energy">75</span></div>
+                <input type="range" min="0" max="100" value="75" oninput="document.getElementById('v-energy').textContent=this.value" id="dna-energy" />
+              </div>
+              <div class="dna-slider">
+                <div class="row"><span>Aggression</span><span id="v-agg">70</span></div>
+                <input type="range" min="0" max="100" value="70" oninput="document.getElementById('v-agg').textContent=this.value" id="dna-agg" />
+              </div>
+              <div class="dna-slider">
+                <div class="row"><span>Storytelling</span><span id="v-story">55</span></div>
+                <input type="range" min="0" max="100" value="55" oninput="document.getElementById('v-story').textContent=this.value" id="dna-story" />
+              </div>
+              <div class="dna-slider">
+                <div class="row"><span>Punchline Density</span><span id="v-punch">65</span></div>
+                <input type="range" min="0" max="100" value="65" oninput="document.getElementById('v-punch').textContent=this.value" id="dna-punch" />
+              </div>
+              <div class="dna-slider">
+                <div class="row"><span>Rhyme Density</span><span id="v-rhyme">80</span></div>
+                <input type="range" min="0" max="100" value="80" oninput="document.getElementById('v-rhyme').textContent=this.value" id="dna-rhyme" />
+              </div>
+              <div class="dna-slider">
+                <div class="row"><span>Internal Rhymes</span><span id="v-internal">70</span></div>
+                <input type="range" min="0" max="100" value="70" oninput="document.getElementById('v-internal').textContent=this.value" id="dna-internal" />
+              </div>
+              <div class="dna-slider">
+                <div class="row"><span>Vocabulary</span><span id="v-vocab">60</span></div>
+                <input type="range" min="0" max="100" value="60" oninput="document.getElementById('v-vocab').textContent=this.value" id="dna-vocab" />
+              </div>
+              <div class="dna-slider">
+                <div class="row"><span>Wordplay</span><span id="v-wordplay">75</span></div>
+                <input type="range" min="0" max="100" value="75" oninput="document.getElementById('v-wordplay').textContent=this.value" id="dna-wordplay" />
+              </div>
+              <div class="dna-slider">
+                <div class="row"><span>Cadence Complexity</span><span id="v-cadence">70</span></div>
+                <input type="range" min="0" max="100" value="70" oninput="document.getElementById('v-cadence').textContent=this.value" id="dna-cadence" />
+              </div>
+            </div>
+
+            <!-- Full RAP DNA PROFILE (Stage 2 output) -->
+            <div id="dnaProfilePanel" style="display:none;margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border);">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.85rem;">
+                <h4 style="font-size:0.8rem;font-weight:600;display:flex;align-items:center;gap:0.5rem;">
+                  RAP DNA Profile
+                  <span style="font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent-bright);background:rgba(168,85,247,0.12);padding:0.15rem 0.45rem;border-radius:4px;">Stage 2</span>
+                </h4>
+                <button class="btn btn-sm btn-secondary" onclick="toggleDnaJson()">JSON</button>
+              </div>
+              <div id="dnaProfileSections" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.75rem;"></div>
+              <pre id="dnaProfileJson" class="intent-json" style="margin-top:0.85rem;"></pre>
+            </div>
+          </div>
+
+          <div class="pipeline-status" id="pipelineStatus">
+            <h4>Pipeline Progress</h4>
+            <div class="pipe-stages" id="pipeStages">
+              <span class="pipe-stage" data-s="1">Prompt Analyzer</span>
+              <span class="pipe-stage" data-s="2">Rap DNA</span>
+              <span class="pipe-stage" data-s="3">Knowledge RAG</span>
+              <span class="pipe-stage" data-s="4">Blueprint</span>
+              <span class="pipe-stage" data-s="5">Lyrics Gen</span>
+              <span class="pipe-stage" data-s="6">Rhyme Engine</span>
+              <span class="pipe-stage" data-s="7">Critic AI</span>
+              <span class="pipe-stage" data-s="8">Humanizer</span>
+              <span class="pipe-stage" data-s="9">Scoring</span>
+              <span class="pipe-stage" data-s="10">Final</span>
+            </div>
+          </div>
+
+          <div class="stats-row" id="statsRow" style="display:none;">
+            <div class="stat-pill"><div class="val" id="statBars">16</div><div class="lbl">Bars</div></div>
+            <div class="stat-pill"><div class="val" id="statSyllables">148</div><div class="lbl">Syllables</div></div>
+            <div class="stat-pill"><div class="val" id="statTime">0:48</div><div class="lbl">Est. Time</div></div>
+            <div class="stat-pill"><div class="val" id="statRhymes">31</div><div class="lbl">Rhymes</div></div>
+            <div class="stat-pill"><div class="val" id="statMulti">12</div><div class="lbl">Multi-syl</div></div>
+          </div>
+
+          <div class="output-section">
+            <div class="output-header">
+              <h3>Generated Lyrics</h3>
+              <div class="output-actions">
+                <button class="btn-icon" title="Copy" onclick="copyLyrics()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                </button>
+                <button class="btn-icon" title="Save" onclick="showToast('Saved to Projects')">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+                </button>
+                <button class="btn-icon" title="Regenerate" onclick="runPipeline()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="lyrics-body" id="lyricsBody">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                <p>Type a prompt → Analyze Prompt (builds Rap Intent) → Generate.<br>Or hit Generate directly — Analyzer runs as Stage 1.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-projects" class="page-view hidden">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+            <p style="color:var(--text-muted);font-size:0.9rem;">6 projects</p>
+            <button class="btn btn-primary" onclick="showToast('New project created')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              New Project
+            </button>
+          </div>
+          <div class="projects-grid">
+            <div class="project-card">
+              <div class="project-card-top"><span class="project-genre">Trap</span></div>
+              <h3>Ambition & Betrayal</h3>
+              <div class="project-meta"><span><span class="status-dot in-progress"></span>In Progress</span><span>Aug 28, 2026</span></div>
+            </div>
+            <div class="project-card">
+              <div class="project-card-top"><span class="project-genre">Boom Bap</span></div>
+              <h3>Midnight Cipher</h3>
+              <div class="project-meta"><span><span class="status-dot complete"></span>Complete</span><span>Aug 25, 2026</span></div>
+            </div>
+            <div class="project-card">
+              <div class="project-card-top"><span class="project-genre">Drill</span></div>
+              <h3>Streets Don't Sleep</h3>
+              <div class="project-meta"><span><span class="status-dot draft"></span>Draft</span><span>Aug 22, 2026</span></div>
+            </div>
+            <div class="project-card">
+              <div class="project-card-top"><span class="project-genre">Hinglish</span></div>
+              <h3>Dil Ka Scene</h3>
+              <div class="project-meta"><span><span class="status-dot in-progress"></span>In Progress</span><span>Aug 20, 2026</span></div>
+            </div>
+            <div class="project-card">
+              <div class="project-card-top"><span class="project-genre">Desi</span></div>
+              <h3>Crown Heavy</h3>
+              <div class="project-meta"><span><span class="status-dot complete"></span>Complete</span><span>Aug 15, 2026</span></div>
+            </div>
+            <div class="project-card">
+              <div class="project-card-top"><span class="project-genre">Conscious</span></div>
+              <h3>Mirror Talk</h3>
+              <div class="project-meta"><span><span class="status-dot draft"></span>Draft</span><span>Aug 10, 2026</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-knowledge" class="page-view hidden">
+          <div style="margin-bottom:1.25rem;">
+            <p style="font-size:0.9rem;color:var(--text-muted);line-height:1.6;max-width:720px;">
+              <strong style="color:var(--text-primary);">RAGA_KNOWLEDGE_BASE</strong> — techniques, structures, and frameworks only.
+              No copyrighted lyrics. Every pipeline stage (RAG, DNA, Blueprint, Critic, Humanizer) retrieves from here.
+            </p>
+          </div>
+          <div class="kb-search">
+            <input type="text" id="kbSearchInput" placeholder="Search folders, techniques, patterns…" oninput="filterKbTree(this.value)" />
+          </div>
+          <div class="kb-categories" id="kbTopCats"></div>
+          <div style="display:grid;grid-template-columns:minmax(240px,320px) 1fr;gap:1.25rem;align-items:start;" id="kbLayout">
+            <div class="kb-list" id="kbFolderTree" style="max-height:calc(100vh - 220px);overflow-y:auto;"></div>
+            <div id="kbDetailPanel" class="settings-section" style="margin:0;min-height:320px;">
+              <p style="color:var(--text-muted);font-size:0.9rem;">Select a folder to view purpose, data types, consumers, and retrieval priority.</p>
+            </div>
+          </div>
+          <div class="settings-section" style="margin-top:1.5rem;">
+            <h3 style="font-size:0.95rem;">Architecture notes</h3>
+            <div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.7;">
+              <p><strong style="color:var(--text-primary);">Storage:</strong> JSON / Markdown technique cards + embeddings (vector DB). Path-based IDs e.g. <code style="color:var(--accent-bright);">rhymes/multisyllabic/chain_patterns</code>.</p>
+              <p style="margin-top:0.5rem;"><strong style="color:var(--text-primary);">Retrieval priority:</strong> ANTI_AI → GENRES+RHYMES+FLOW (high) → HOOKS/PUNCHLINES/WORDPLAY (mid) → THEMES/VOCABULARY (context) → RAP_DNA_PRESETS (seed).</p>
+              <p style="margin-top:0.5rem;"><strong style="color:var(--text-primary);">Scale:</strong> Partition by top-level domain; shard embeddings per domain; version cards; never store full song lyrics.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-settings" class="page-view hidden">
+          <div class="settings-section">
+            <h3>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a10 10 0 0110 10c0 5.5-4.5 10-10 10S2 17.5 2 12 6.5 2 12 2z"/></svg>
+              AI Provider (OpenRouter)
+            </h3>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1.25rem;line-height:1.6;">
+              Enter your OpenRouter API key and the exact model ID. Requests go to the Base URL below using the OpenAI-compatible chat completions endpoint.
+            </p>
+            <div class="form-group">
+              <label>OpenRouter API Key</label>
+              <input type="password" id="setting-api-key" placeholder="sk-or-v1-..." autocomplete="off" />
+            </div>
+            <div class="form-group">
+              <label>Base URL</label>
+              <input type="text" id="setting-base-url" placeholder="https://openrouter.ai/api/v1" value="https://openrouter.ai/api/v1" />
+            </div>
+            <div class="form-group">
+              <label>Model ID</label>
+              <input type="text" id="setting-model" placeholder="e.g. anthropic/claude-3.5-sonnet  or  openai/gpt-4o" value="" autocomplete="off" />
+              <p style="font-size:0.72rem;color:var(--text-muted);margin-top:0.4rem;">Leave blank until you paste the model path from openrouter.ai/models</p>
+            </div>
+            <div class="form-group">
+              <label>HTTP Referer (optional)</label>
+              <input type="text" id="setting-referer" placeholder="https://raga.app" value="" />
+            </div>
+            <div class="form-group">
+              <label>App Title (optional)</label>
+              <input type="text" id="setting-app-title" placeholder="RAGA" value="RAGA" />
+            </div>
+            <div id="settings-status" style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem;"></div>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+              <button class="btn btn-secondary" onclick="testConnection()">Test Connection</button>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/></svg>
+              Generation
+            </h3>
+            <div class="form-group slider-group">
+              <div class="slider-header"><span>Temperature</span><span id="val-temp">0.85</span></div>
+              <input type="range" id="setting-temp" min="0" max="100" value="85" oninput="document.getElementById('val-temp').textContent=(this.value/100).toFixed(2)" />
+            </div>
+            <div class="form-group slider-group">
+              <div class="slider-header"><span>Max Tokens</span><span id="val-tokens">1200</span></div>
+              <input type="range" id="setting-tokens" min="200" max="4000" step="100" value="1200" oninput="document.getElementById('val-tokens').textContent=this.value" />
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Humanizer & Critic
+            </h3>
+            <div class="form-group slider-group">
+              <div class="slider-header"><span>Humanizer Strength</span><span id="val-human">80</span></div>
+              <input type="range" id="setting-human" min="0" max="100" value="80" oninput="document.getElementById('val-human').textContent=this.value" />
+            </div>
+            <div class="form-group slider-group">
+              <div class="slider-header"><span>Critic Strictness</span><span id="val-critic">70</span></div>
+              <input type="range" id="setting-critic" min="0" max="100" value="70" oninput="document.getElementById('val-critic').textContent=this.value" />
+            </div>
+          </div>
+        </div>
+
+        <div id="page-studio" class="page-view hidden">
+          <div class="empty-state" style="padding-top:4rem;">
+            <p>Studio mirrors Dashboard in this skeleton.</p>
+            <button class="btn btn-primary" style="margin-top:1rem;" onclick="navTo('dashboard')">Go to Dashboard</button>
+          </div>
+        </div>
+        <div id="page-templates" class="page-view hidden">
+          <div class="empty-state" style="padding-top:4rem;"><p>Templates — verse structures & genre presets.</p></div>
+        </div>
+        <div id="page-history" class="page-view hidden">
+          <div class="empty-state" style="padding-top:4rem;"><p>Generation history will appear here.</p></div>
+        </div>
+        <div id="page-favorites" class="page-view hidden">
+          <div class="empty-state" style="padding-top:4rem;"><p>Favorited lyrics and projects.</p></div>
+        </div>
+      </div>
+
+      <aside class="right-panel" id="rightPanel">
+        <p class="panel-section-title">Critic AI</p>
+        <div class="critic-overall">
+          <div class="score" id="overallScore">—</div>
+          <div class="label">Overall Score</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-header"><span class="metric-name">Flow</span><span class="metric-value mid" id="m-flow">—</span></div>
+          <div class="metric-bar"><div class="metric-bar-fill blue" id="b-flow" style="width:0%"></div></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-header"><span class="metric-name">Punchlines</span><span class="metric-value mid" id="m-punch">—</span></div>
+          <div class="metric-bar"><div class="metric-bar-fill purple" id="b-punch" style="width:0%"></div></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-header"><span class="metric-name">Originality</span><span class="metric-value mid" id="m-orig">—</span></div>
+          <div class="metric-bar"><div class="metric-bar-fill green" id="b-orig" style="width:0%"></div></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-header"><span class="metric-name">Naturalness</span><span class="metric-value mid" id="m-nat">—</span></div>
+          <div class="metric-bar"><div class="metric-bar-fill blue" id="b-nat" style="width:0%"></div></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-header"><span class="metric-name">Emotion</span><span class="metric-value mid" id="m-emotion">—</span></div>
+          <div class="metric-bar"><div class="metric-bar-fill amber" id="b-emotion" style="width:0%"></div></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-header"><span class="metric-name">Vocabulary</span><span class="metric-value mid" id="m-vocab">—</span></div>
+          <div class="metric-bar"><div class="metric-bar-fill purple" id="b-vocab" style="width:0%"></div></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-header"><span class="metric-name">Rhyme Quality</span><span class="metric-value mid" id="m-rhyme">—</span></div>
+          <div class="metric-bar"><div class="metric-bar-fill green" id="b-rhyme" style="width:0%"></div></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-header"><span class="metric-name">Hook Strength</span><span class="metric-value mid" id="m-hook">—</span></div>
+          <div class="metric-bar"><div class="metric-bar-fill purple" id="b-hook" style="width:0%"></div></div>
+        </div>
+        <p class="panel-section-title">Rap DNA Snapshot</p>
+        <div class="metric-card" style="font-size:0.8rem;color:var(--text-muted);line-height:1.7;" id="dnaSnapshot">
+          Analyze a prompt or configure DNA to see snapshot.
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <span class="toast-icon">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+  </span>
+  <span class="toast-msg" id="toastMsg">Done</span>
+</div>
+
+<script>
+/* ========== PROMPT ANALYZER MODULE ========== */
+const PromptAnalyzer = {
+  genres: {
+    trap: ['trap', '808', 'hi-hat', 'autotune'],
+    drill: ['drill', 'sliding', 'uk drill', 'chicago drill'],
+    'boom bap': ['boom bap', 'boom-bap', 'classic hip hop', 'old school', 'vinyl'],
+    melodic: ['melodic', 'singing', 'melody', 'r&b'],
+    storytelling: ['story', 'storytelling', 'narrative', 'story-telling'],
+    conscious: ['conscious', 'political', 'message', 'awareness'],
+    hardcore: ['hardcore', 'battle', 'aggressive rap', 'hard hitting'],
+    'desi hip hop': ['desi', 'desi hip hop', 'desi hip-hop', 'indian hip hop']
+  },
+  languages: {
+    hinglish: ['hinglish', 'hindi english', 'hindi-english', 'mix hindi'],
+    hindi: ['hindi', 'हिंदी'],
+    punjabi: ['punjabi', 'pbi'],
+    urdu: ['urdu'],
+    english: ['english', 'eng']
+  },
+  moods: {
+    dark: ['dark', 'gritty', 'noir', 'bleak'],
+    sad: ['sad', 'melancholy', 'melancholic', 'heartbreak', 'painful'],
+    aggressive: ['aggressive', 'hard', 'fierce', 'violent', 'angry'],
+    motivational: ['motivational', 'inspire', 'hustle', 'grind', 'ambition'],
+    romantic: ['romantic', 'love', 'lover', 'romance'],
+    confident: ['confident', 'swagger', 'boss', 'flex'],
+    emotional: ['emotional', 'feelings', 'vulnerable'],
+    cold: ['cold', 'detached', 'icy'],
+    energetic: ['energetic', 'hype', 'party', 'upbeat'],
+    reflective: ['reflective', 'introspective', 'thoughtful', 'deep']
+  },
+  topics: [
+    'betrayal', 'success', 'love', 'money', 'street life', 'motivation',
+    'pain', 'family', 'friendship', 'self-confidence', 'dreams', 'struggle',
+    'ambition', 'revenge', 'heartbreak', 'loyalty', 'hustle', 'fame',
+    'poverty', 'power', 'respect', 'loss', 'growth'
+  ],
+  vocabStyles: {
+    street: ['street', 'slang', 'hood', 'gang'],
+    poetic: ['poetic', 'metaphor', 'literary'],
+    technical: ['technical', 'complex', 'multisyllabic', 'multi-syllabic', 'lyrical'],
+    luxury: ['luxury', 'flex', 'expensive', 'rich'],
+    gangster: ['gangster', 'gangsta', 'mafia', 'cartel'],
+    simple: ['simple', 'basic', 'easy']
+  },
+  audiences: {
+    street: ['street', 'hood', 'underground street'],
+    youth: ['youth', 'young', 'gen z', 'teen'],
+    mainstream: ['mainstream', 'radio', 'commercial'],
+    underground: ['underground', 'indie', 'niche'],
+    general: []
+  },
+  styleRefs: {
+    'technical': ['kr$na', 'krsna', 'eminem', 'tech n9ne', 'black thought'],
+    'multisyllabic': ['kr$na', 'krsna', 'eminem', 'mf doom', 'black thought'],
+    'high_punchlines': ['kr$na', 'krsna', 'big sean', 'j cole'],
+    'storytelling': ['kendrick', 'nas', 'j cole', 'eminem'],
+    'melodic': ['drake', 'travis', 'the weeknd'],
+    'aggressive': ['tyler', 'dmg', 'dmx', '50 cent']
+  },
+  bpmDefaults: {
+    trap: 140, drill: 145, 'boom bap': 90, melodic: 100,
+    storytelling: 95, conscious: 92, hardcore: 95, 'desi hip hop': 135
+  },
+
+  analyze(raw) {
+    const text = (raw || '').toLowerCase().trim();
+    if (!text) return this.defaultIntent();
+
+    let confidence = 0.4;
+    const hits = { genre: 0, lang: 0, mood: 0, topic: 0, bpm: 0 };
+
+    // Genre
+    let genre = 'trap';
+    for (const [g, keys] of Object.entries(this.genres)) {
+      if (keys.some(k => text.includes(k))) { genre = g; hits.genre = 1; confidence += 0.12; break; }
+    }
+
+    // Language
+    let language = 'english';
+    for (const [l, keys] of Object.entries(this.languages)) {
+      if (keys.some(k => text.includes(k))) { language = l; hits.lang = 1; confidence += 0.12; break; }
+    }
+    if (text.match(/[अ-ह]/)) { language = language === 'english' ? 'hindi' : language; hits.lang = 1; confidence += 0.08; }
+
+    // Mood
+    let mood = 'confident';
+    for (const [m, keys] of Object.entries(this.moods)) {
+      if (keys.some(k => text.includes(k))) { mood = m; hits.mood = 1; confidence += 0.1; break; }
+    }
+
+    // Topic
+    let topic = 'ambition';
+    const foundTopics = this.topics.filter(t => text.includes(t));
+    if (foundTopics.length) {
+      topic = foundTopics.slice(0, 3).join(' and ');
+      hits.topic = 1;
+      confidence += 0.12;
+    } else {
+      // Extract after "about"
+      const aboutMatch = text.match(/about\s+([^.!?\n]+)/);
+      if (aboutMatch) { topic = aboutMatch[1].trim().slice(0, 60); hits.topic = 1; confidence += 0.1; }
+    }
+
+    // BPM
+    let bpm = this.bpmDefaults[genre] || 140;
+    const bpmMatch = text.match(/(\d{2,3})\s*(?:bpm|BPM)/);
+    if (bpmMatch) {
+      bpm = Math.min(200, Math.max(60, parseInt(bpmMatch[1], 10)));
+      hits.bpm = 1;
+      confidence += 0.1;
+    }
+
+    // Energy & Aggression (1-10)
+    let energy = 6, aggression = 5;
+    if (['aggressive', 'dark', 'hardcore', 'drill'].includes(mood) || genre === 'drill' || genre === 'hardcore') {
+      energy = 8; aggression = 8;
+    }
+    if (['sad', 'reflective', 'emotional'].includes(mood)) { energy = 3; aggression = 2; }
+    if (['motivational', 'energetic', 'confident'].includes(mood)) { energy = 8; aggression = 6; }
+    if (genre === 'trap' || genre === 'drill') aggression = Math.max(aggression, 7);
+    if (text.includes('aggressive') || text.includes('hard')) aggression = Math.min(10, aggression + 2);
+    if (text.includes('soft') || text.includes('chill')) { energy = 4; aggression = 2; }
+
+    // Storytelling
+    let storytelling = 3;
+    if (genre === 'storytelling' || text.includes('story') || text.includes('narrative')) storytelling = 8;
+    if (text.includes('conscious')) storytelling = 7;
+
+    // Punchline density
+    let punchline_density = 'medium';
+    if (text.includes('punchline') || text.includes('bars') || text.includes('lyrical')) punchline_density = 'high';
+    if (text.includes('simple') || text.includes('catchy')) punchline_density = 'low';
+    if (genre === 'boom bap' || genre === 'conscious') punchline_density = 'high';
+
+    // Hook
+    let hook_required = true;
+    if (text.includes('no hook') || text.includes('verse only') || text.includes('without hook')) hook_required = false;
+    if (text.includes('hook') || text.includes('chorus')) hook_required = true;
+
+    // Vocabulary
+    let vocabulary_style = 'street';
+    for (const [v, keys] of Object.entries(this.vocabStyles)) {
+      if (keys.some(k => text.includes(k))) { vocabulary_style = v; confidence += 0.06; break; }
+    }
+
+    // Audience
+    let audience = 'general';
+    for (const [a, keys] of Object.entries(this.audiences)) {
+      if (keys.some(k => text.includes(k))) { audience = a; break; }
+    }
+
+    // Emotions
+    const emotionMap = {
+      dark: ['pain', 'anger'], sad: ['pain', 'longing'], aggressive: ['anger', 'confidence'],
+      motivational: ['confidence', 'ambition'], romantic: ['love', 'desire'],
+      confident: ['confidence', 'pride'], emotional: ['pain', 'vulnerability'],
+      cold: ['detachment'], energetic: ['excitement'], reflective: ['introspection']
+    };
+    const emotion = emotionMap[mood] || ['confidence'];
+
+    // Style attributes from references (no imitation)
+    const style_attributes = {};
+    for (const [attr, artists] of Object.entries(this.styleRefs)) {
+      if (artists.some(a => text.includes(a))) {
+        style_attributes[attr] = true;
+        confidence += 0.05;
+      }
+    }
+    if (text.includes('multisyllabic') || text.includes('multi-syllabic')) style_attributes.multisyllabic = true;
+    if (text.includes('punchline')) style_attributes.high_punchlines = true;
+
+    confidence = Math.min(0.98, Math.round(confidence * 100) / 100);
+
+    return {
+      topic,
+      genre,
+      language,
+      mood,
+      energy,
+      aggression,
+      storytelling_level: storytelling,
+      punchline_density,
+      hook_required,
+      bpm,
+      vocabulary_style,
+      audience,
+      emotion,
+      style_attributes,
+      confidence,
+      raw_prompt: raw.trim()
+    };
+  },
+
+  defaultIntent() {
+    return {
+      topic: 'ambition',
+      genre: 'trap',
+      language: 'english',
+      mood: 'confident',
+      energy: 7,
+      aggression: 6,
+      storytelling_level: 4,
+      punchline_density: 'medium',
+      hook_required: true,
+      bpm: 140,
+      vocabulary_style: 'street',
+      audience: 'general',
+      emotion: ['confidence'],
+      style_attributes: {},
+      confidence: 0.3,
+      raw_prompt: ''
+    };
+  },
+
+  validate(intent) {
+    const errors = [];
+    if (!intent.topic || intent.topic.length < 2) errors.push('topic_missing');
+    if (intent.energy < 1 || intent.energy > 10) errors.push('energy_out_of_range');
+    if (intent.aggression < 1 || intent.aggression > 10) errors.push('aggression_out_of_range');
+    if (intent.bpm < 60 || intent.bpm > 200) errors.push('bpm_invalid');
+    if (!['low', 'medium', 'high'].includes(intent.punchline_density)) errors.push('punchline_invalid');
+    return { valid: errors.length === 0, errors };
+  }
+};
+
+let lastIntent = null;
+let lastDnaProfile = null;
+
+/* ========== RAP DNA BUILDER (Stage 2) ========== */
+const RapDNABuilder = {
+  build(intent) {
+    if (!intent) intent = PromptAnalyzer.defaultIntent();
+
+    const topics = Array.isArray(intent.topic)
+      ? intent.topic
+      : String(intent.topic || 'ambition').split(/\s+and\s+|\s*,\s*/).map(t => t.trim()).filter(Boolean);
+
+    const primaryTheme = topics[0] || 'ambition';
+    const secondaryTheme = topics[1] || this.inferSecondary(primaryTheme, intent.mood);
+    const genre = (intent.genre || 'trap').toLowerCase();
+    const lang = (intent.language || 'english').toLowerCase();
+    const mood = (intent.mood || 'confident').toLowerCase();
+    const energy = this.clamp10(intent.energy ?? 7);
+    const aggression = this.clamp10(intent.aggression ?? 6);
+    const storytelling = this.clamp10(intent.storytelling_level ?? intent.storytelling ?? 4);
+    const punch = this.punchToScore(intent.punchline_density);
+    const bpm = intent.bpm || 140;
+    const vocabStyle = intent.vocabulary_style || 'street';
+    const styleAttrs = intent.style_attributes || {};
+
+    // --- CREATIVE DNA ---
+    const creative = {
+      theme_hierarchy: [primaryTheme, secondaryTheme].filter(Boolean),
+      primary_theme: primaryTheme,
+      secondary_theme: secondaryTheme,
+      core_message: this.coreMessage(primaryTheme, secondaryTheme, mood),
+      narrative_direction: storytelling >= 6 ? 'arc' : (storytelling >= 3 ? 'vignette' : 'statement'),
+      perspective: this.pickPerspective(mood, storytelling),
+      narrative_depth: storytelling,
+      storytelling_weight: storytelling,
+      emotional_complexity: this.clamp10(Math.round((energy + aggression + storytelling) / 3) + (mood === 'dark' || mood === 'emotional' ? 1 : 0))
+    };
+
+    // --- EMOTIONAL DNA ---
+    const emotional = this.buildEmotionalJourney(mood, energy, aggression, storytelling);
+
+    // --- GENRE DNA ---
+    const genreDna = this.buildGenreProfile(genre, mood, energy, aggression);
+
+    // --- LANGUAGE DNA ---
+    const language = this.buildLanguageDna(lang, vocabStyle, aggression, styleAttrs);
+
+    // --- TECHNICAL DNA ---
+    const technical = this.buildTechnicalDna({
+      genre, energy, aggression, storytelling, punch, styleAttrs, bpm, rhymeHint: intent.rhyme_density
+    });
+
+    // --- PERFORMANCE DNA (derived) ---
+    const performance = {
+      bpm,
+      recommended_bpm_range: this.bpmRange(genre),
+      energy_target: energy,
+      aggression_target: aggression,
+      delivery_style: this.deliveryStyle(genre, energy, aggression),
+      pocket: genre.includes('trap') || genre === 'drill' ? 'behind' : (genre.includes('boom') ? 'on' : 'flexible'),
+      hook_required: intent.hook_required !== false,
+      estimated_bars: this.estimateBars(intent)
+    };
+
+    const profile = {
+      version: '1.0',
+      source_intent_confidence: intent.confidence ?? 0.5,
+      creative,
+      emotional,
+      genre: genreDna,
+      language,
+      technical,
+      performance,
+      // Flat controls for UI / generator
+      controls: {
+        genre: genreDna.subgenre || genreDna.genre_profile,
+        language: lang,
+        mood,
+        energy: energy * 10,
+        aggression: aggression * 10,
+        storytelling: storytelling * 10,
+        punchline_density: punch * 10,
+        rhyme_density: technical.rhyme_density * 10,
+        internal_rhymes: technical.internal_rhyme_density * 10,
+        vocabulary: language.street_language * 8 + language.poetic_language * 2,
+        wordplay: technical.wordplay_density * 10,
+        cadence_complexity: technical.cadence_complexity * 10,
+        bpm,
+        hook_style: this.hookStyle(genre, mood, intent)
+      }
+    };
+
+    return profile;
+  },
+
+  clamp10(n) {
+    n = Number(n);
+    if (isNaN(n)) return 5;
+    if (n > 10) return Math.min(10, Math.round(n / 10)); // allow 0-100 inputs
+    return Math.max(0, Math.min(10, Math.round(n)));
+  },
+
+  punchToScore(p) {
+    if (typeof p === 'number') return this.clamp10(p);
+    const m = { low: 3, medium: 6, high: 9 };
+    return m[String(p || 'medium').toLowerCase()] || 6;
+  },
+
+  inferSecondary(primary, mood) {
+    const map = {
+      betrayal: 'loyalty', success: 'struggle', love: 'heartbreak', money: 'hustle',
+      ambition: 'obstacles', pain: 'healing', family: 'legacy', revenge: 'power'
+    };
+    return map[primary] || (mood === 'dark' ? 'isolation' : 'growth');
+  },
+
+  coreMessage(primary, secondary, mood) {
+    const templates = {
+      dark: `Rise through ${primary} without losing self; ${secondary} is the cost and the fuel.`,
+      aggressive: `Own the narrative of ${primary}; weaponize ${secondary}.`,
+      motivational: `Turn ${primary} into momentum; ${secondary} becomes proof.`,
+      sad: `Sit with ${primary}; let ${secondary} surface honestly.`,
+      confident: `${primary} is earned; ${secondary} is the receipt.`,
+      reflective: `Examine ${primary} and what ${secondary} still demands.`
+    };
+    return templates[mood] || templates.confident;
+  },
+
+  pickPerspective(mood, storytelling) {
+    if (storytelling >= 7) return 'first_person';
+    if (mood === 'aggressive' || mood === 'confident') return 'first_person';
+    if (mood === 'reflective') return Math.random() > 0.5 ? 'first_person' : 'second_person';
+    return 'first_person';
+  },
+
+  buildEmotionalJourney(mood, energy, aggression, storytelling) {
+    const bases = {
+      dark: { primary: 'pain', secondary: 'anger', support: ['distrust', 'resolve'] },
+      sad: { primary: 'grief', secondary: 'longing', support: ['regret', 'tenderness'] },
+      aggressive: { primary: 'anger', secondary: 'defiance', support: ['pride', 'urgency'] },
+      motivational: { primary: 'ambition', secondary: 'confidence', support: ['drive', 'hope'] },
+      romantic: { primary: 'desire', secondary: 'vulnerability', support: ['affection', 'doubt'] },
+      confident: { primary: 'confidence', secondary: 'pride', support: ['control', 'swagger'] },
+      emotional: { primary: 'vulnerability', secondary: 'pain', support: ['hope', 'fear'] },
+      cold: { primary: 'detachment', secondary: 'control', support: ['calculation'] },
+      energetic: { primary: 'excitement', secondary: 'confidence', support: ['hype'] },
+      reflective: { primary: 'introspection', secondary: 'doubt', support: ['clarity', 'acceptance'] }
+    };
+    const b = bases[mood] || bases.confident;
+
+    const curve = {
+      verse_1: { emotion: b.primary, intensity: this.clamp10(energy - 1) },
+      hook: { emotion: aggression >= 7 ? 'defiance' : b.secondary, intensity: this.clamp10(Math.max(energy, aggression)) },
+      verse_2: { emotion: aggression >= 6 ? 'anger' : b.secondary, intensity: this.clamp10(aggression) },
+      outro: { emotion: energy >= 7 ? 'confidence' : 'resolve', intensity: this.clamp10(Math.round((energy + aggression) / 2) + 1) }
+    };
+    if (storytelling >= 7) {
+      curve.verse_1.emotion = b.primary;
+      curve.verse_2.emotion = 'turning_point';
+      curve.outro.emotion = 'resolution';
+    }
+
+    return {
+      primary_emotion: b.primary,
+      secondary_emotion: b.secondary,
+      supporting_emotions: b.support,
+      emotional_progression_curve: curve
+    };
+  },
+
+  buildGenreProfile(genre, mood, energy, aggression) {
+    let sub = genre;
+    const fusion = [];
+    if (genre === 'trap') {
+      if (mood === 'dark') sub = 'dark trap';
+      else if (energy >= 8 && aggression >= 8) sub = 'hard trap';
+      else if (mood === 'melodic' || energy <= 5) sub = 'melodic trap';
+      if (aggression >= 8) fusion.push('drill');
+    } else if (genre === 'drill') {
+      sub = mood === 'dark' ? 'dark drill' : 'drill';
+      fusion.push('trap');
+    } else if (genre === 'boom bap') {
+      sub = aggression >= 7 ? 'hard boom bap' : 'classic boom bap';
+      if (mood === 'reflective' || mood === 'conscious') fusion.push('conscious');
+    } else if (genre === 'desi hip hop') {
+      sub = 'desi hip hop';
+      fusion.push('trap', 'hinglish');
+    } else if (genre === 'conscious') {
+      sub = 'conscious hip hop';
+      fusion.push('boom bap');
+    } else if (genre === 'melodic') {
+      sub = 'melodic rap';
+      fusion.push('r&b', 'trap');
+    } else if (genre === 'storytelling') {
+      sub = 'narrative hip hop';
+      fusion.push('boom bap');
+    } else if (genre === 'hardcore') {
+      sub = 'hardcore rap';
+      fusion.push('boom bap');
+    }
+
+    let confidence = 0.75;
+    if (mood === 'dark' && genre === 'trap') confidence = 0.9;
+    if (genre === 'drill' && aggression >= 8) confidence = 0.92;
+
+    return {
+      genre_profile: genre,
+      subgenre: sub,
+      fusion_elements: fusion,
+      genre_confidence: confidence
+    };
+  },
+
+  buildLanguageDna(lang, vocabStyle, aggression, styleAttrs) {
+    const ratios = {
+      english: { english: 95, hindi: 0, hinglish: 5, urdu: 0, punjabi: 0 },
+      hinglish: { english: 45, hindi: 25, hinglish: 70, urdu: 5, punjabi: 0 },
+      hindi: { english: 15, hindi: 75, hinglish: 40, urdu: 10, punjabi: 0 },
+      punjabi: { english: 25, hindi: 10, hinglish: 20, urdu: 5, punjabi: 70 },
+      urdu: { english: 20, hindi: 30, hinglish: 25, urdu: 55, punjabi: 0 },
+      'urdu-hindi': { english: 20, hindi: 40, hinglish: 30, urdu: 45, punjabi: 0 }
+    };
+    const mix = ratios[lang] || ratios.english;
+
+    const slang = vocabStyle === 'street' || vocabStyle === 'gangster' ? 8 : vocabStyle === 'technical' ? 4 : 5;
+    const poetic = vocabStyle === 'poetic' ? 8 : (styleAttrs.technical ? 5 : 3);
+    const street = vocabStyle === 'street' || vocabStyle === 'raw' || vocabStyle === 'gangster' ? 9 : 5;
+    const codeSwitch = (lang === 'hinglish' || lang === 'hindi' || lang === 'punjabi') ? 8 : 2;
+
+    return {
+      language_mix_ratio: mix,
+      vocabulary_style: vocabStyle,
+      slang_density: this.clamp10(slang + (aggression >= 8 ? 1 : 0)),
+      code_switching: this.clamp10(codeSwitch),
+      poetic_language: this.clamp10(poetic),
+      street_language: this.clamp10(street)
+    };
+  },
+
+  buildTechnicalDna({ genre, energy, aggression, storytelling, punch, styleAttrs, bpm }) {
+    let rhyme = 7, endR = 8, internal = 6, multi = 5, near = 4, slant = 3;
+    let syllable = 6, cadence = 6, bar = 6, wordplay = 6, double = 4, metaphor = 4;
+
+    if (genre.includes('boom') || genre === 'conscious' || genre === 'storytelling') {
+      multi += 2; internal += 2; wordplay += 1; metaphor += 2; bar += 1;
+    }
+    if (genre === 'trap' || genre === 'drill') {
+      syllable += 1; cadence += 2; endR += 1;
+      if (bpm >= 140) cadence += 1;
+    }
+    if (styleAttrs.multisyllabic || styleAttrs.technical) {
+      multi = 9; internal = 8; wordplay = 8; bar = 8;
+    }
+    if (styleAttrs.high_punchlines) punch = Math.max(punch, 8);
+    if (storytelling >= 7) { metaphor += 2; double += 1; bar += 1; }
+    if (aggression >= 8) { endR += 1; punch = Math.max(punch, 7); }
+
+    return {
+      rhyme_density: this.clamp10(rhyme),
+      end_rhyme_density: this.clamp10(endR),
+      internal_rhyme_density: this.clamp10(internal),
+      multisyllabic_rhyme_density: this.clamp10(multi),
+      near_rhyme_density: this.clamp10(near),
+      slant_rhyme_density: this.clamp10(slant),
+      syllable_density: this.clamp10(syllable),
+      cadence_complexity: this.clamp10(cadence),
+      bar_complexity: this.clamp10(bar),
+      wordplay_density: this.clamp10(wordplay),
+      double_meaning_density: this.clamp10(double),
+      punchline_density: this.clamp10(punch),
+      metaphor_density: this.clamp10(metaphor)
+    };
+  },
+
+  bpmRange(genre) {
+    const map = {
+      trap: [130, 150], drill: [140, 150], 'boom bap': [80, 100],
+      melodic: [90, 120], storytelling: [85, 105], conscious: [85, 100],
+      hardcore: [90, 110], 'desi hip hop': [120, 145]
+    };
+    const r = map[genre] || [120, 140];
+    return { min: r[0], max: r[1] };
+  },
+
+  deliveryStyle(genre, energy, aggression) {
+    if (genre === 'drill') return 'staccato_aggressive';
+    if (genre.includes('boom')) return 'pocket_laid_back';
+    if (genre === 'melodic') return 'sung_rhythmic';
+    if (aggression >= 8) return 'aggressive_punchy';
+    if (energy >= 8) return 'high_energy_flow';
+    return 'controlled_flow';
+  },
+
+  estimateBars(intent) {
+    const len = String(intent.length || '').toLowerCase();
+    if (len.includes('8')) return 8;
+    if (len.includes('32')) return 32;
+    if (len.includes('full')) return 48;
+    return 16;
+  },
+
+  hookStyle(genre, mood, intent) {
+    if (intent?.hook_style) return intent.hook_style;
+    if (genre === 'melodic' || mood === 'romantic') return 'Melodic';
+    if (genre === 'drill' || mood === 'aggressive') return 'Chant';
+    if (genre.includes('boom')) return 'Call & Response';
+    return 'Chant';
+  }
+};
+
+function analyzePrompt() {
+  const raw = document.getElementById('promptInput').value;
+  if (!raw.trim()) {
+    showToast('Enter a prompt first');
+    return;
+  }
+  const intent = PromptAnalyzer.analyze(raw);
+  lastIntent = intent;
+  renderIntent(intent);
+  applyIntentToDNA(intent);
+
+  const profile = RapDNABuilder.build(intent);
+  lastDnaProfile = profile;
+  renderDnaProfile(profile);
+  applyProfileToControls(profile);
+
+  showToast(`Intent + DNA built · confidence ${Math.round(intent.confidence * 100)}%`);
+}
+
+function renderDnaProfile(profile) {
+  const panel = document.getElementById('dnaProfilePanel');
+  if (!panel) return;
+  panel.style.display = 'block';
+
+  const sections = document.getElementById('dnaProfileSections');
+  const c = profile.creative;
+  const e = profile.emotional;
+  const g = profile.genre;
+  const l = profile.language;
+  const t = profile.technical;
+  const p = profile.performance;
+
+  const curve = e.emotional_progression_curve || {};
+  const curveHtml = Object.entries(curve).map(([k, v]) =>
+    `${k.replace('_', ' ')}: ${v.emotion} (${v.intensity})`
+  ).join('<br>');
+
+  sections.innerHTML = `
+    <div class="intent-chip">
+      <div class="key">Creative</div>
+      <div class="val" style="font-size:0.78rem;font-weight:500;line-height:1.5;">
+        <strong>${c.primary_theme}</strong> → ${c.secondary_theme}<br>
+        ${c.perspective.replace('_', ' ')} · depth ${c.narrative_depth}/10<br>
+        <span style="color:var(--text-muted)">${c.core_message.slice(0, 80)}${c.core_message.length > 80 ? '…' : ''}</span>
+      </div>
+    </div>
+    <div class="intent-chip">
+      <div class="key">Emotional Arc</div>
+      <div class="val" style="font-size:0.75rem;font-weight:500;line-height:1.55;">
+        ${e.primary_emotion} / ${e.secondary_emotion}<br>
+        ${curveHtml}
+      </div>
+    </div>
+    <div class="intent-chip">
+      <div class="key">Genre</div>
+      <div class="val" style="font-size:0.8rem;">
+        <span class="tag">${g.subgenre}</span><br>
+        <span style="font-size:0.72rem;color:var(--text-muted);font-weight:500;">
+          fusion: ${(g.fusion_elements || []).join(', ') || '—'} · conf ${Math.round((g.genre_confidence || 0) * 100)}%
+        </span>
+      </div>
+    </div>
+    <div class="intent-chip">
+      <div class="key">Language Mix</div>
+      <div class="val" style="font-size:0.75rem;font-weight:500;line-height:1.5;">
+        ${l.vocabulary_style} · slang ${l.slang_density}/10<br>
+        EN ${l.language_mix_ratio.english}% · HI ${l.language_mix_ratio.hindi}% · HG ${l.language_mix_ratio.hinglish}%
+      </div>
+    </div>
+    <div class="intent-chip">
+      <div class="key">Technical</div>
+      <div class="val" style="font-size:0.75rem;font-weight:500;line-height:1.5;">
+        Rhyme ${t.rhyme_density} · Multi ${t.multisyllabic_rhyme_density} · Internal ${t.internal_rhyme_density}<br>
+        Punch ${t.punchline_density} · Wordplay ${t.wordplay_density} · Cadence ${t.cadence_complexity}
+      </div>
+    </div>
+    <div class="intent-chip">
+      <div class="key">Performance</div>
+      <div class="val" style="font-size:0.75rem;font-weight:500;line-height:1.5;">
+        ${p.bpm} BPM (${p.recommended_bpm_range.min}–${p.recommended_bpm_range.max})<br>
+        ${p.delivery_style.replace(/_/g, ' ')} · ${p.estimated_bars} bars · pocket ${p.pocket}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('dnaProfileJson').textContent = JSON.stringify(profile, null, 2);
+  document.getElementById('dnaProfileJson').classList.remove('open');
+}
+
+function toggleDnaJson() {
+  document.getElementById('dnaProfileJson').classList.toggle('open');
+}
+
+function applyProfileToControls(profile) {
+  const ctrl = profile.controls || {};
+  const genreMap = {
+    trap: 'Trap', 'dark trap': 'Trap', 'hard trap': 'Trap', 'melodic trap': 'Trap',
+    drill: 'Drill', 'dark drill': 'Drill',
+    'boom bap': 'Boom Bap', 'classic boom bap': 'Boom Bap', 'hard boom bap': 'Boom Bap',
+    conscious: 'Conscious', 'conscious hip hop': 'Conscious',
+    storytelling: 'Storytelling', 'narrative hip hop': 'Storytelling',
+    melodic: 'Melodic', 'melodic rap': 'Melodic',
+    hardcore: 'Hardcore', 'hardcore rap': 'Hardcore',
+    'desi hip hop': 'Desi Hip Hop'
+  };
+  const g = (ctrl.genre || '').toLowerCase();
+  document.getElementById('dna-genre').value = genreMap[g] || genreMap[g.split(' ').pop()] || 'Trap';
+
+  const langMap = { english: 'English', hinglish: 'Hinglish', hindi: 'Hindi', punjabi: 'Punjabi', urdu: 'Urdu-Hindi', 'urdu-hindi': 'Urdu-Hindi' };
+  document.getElementById('dna-lang').value = langMap[(ctrl.language || '').toLowerCase()] || 'English';
+
+  const moodMap = {
+    dark: 'Dark', sad: 'Melancholic', aggressive: 'Aggressive', motivational: 'Uplifting',
+    romantic: 'Reflective', confident: 'Confident', emotional: 'Introspective',
+    cold: 'Dark', energetic: 'Aggressive', reflective: 'Reflective'
+  };
+  document.getElementById('dna-mood').value = moodMap[(ctrl.mood || '').toLowerCase()] || 'Aggressive';
+  document.getElementById('dna-bpm').value = ctrl.bpm || 140;
+  if (ctrl.hook_style) {
+    const hs = document.getElementById('dna-hook');
+    for (const opt of hs.options) {
+      if (opt.value.toLowerCase() === String(ctrl.hook_style).toLowerCase()) { hs.value = opt.value; break; }
+    }
+  }
+
+  setSlider('dna-energy', 'v-energy', Math.round(ctrl.energy || 70));
+  setSlider('dna-agg', 'v-agg', Math.round(ctrl.aggression || 70));
+  setSlider('dna-story', 'v-story', Math.round(ctrl.storytelling || 50));
+  setSlider('dna-punch', 'v-punch', Math.round(ctrl.punchline_density || 65));
+  setSlider('dna-rhyme', 'v-rhyme', Math.round(ctrl.rhyme_density || 80));
+  setSlider('dna-internal', 'v-internal', Math.round(ctrl.internal_rhymes || 70));
+  setSlider('dna-vocab', 'v-vocab', Math.round(ctrl.vocabulary || 60));
+  setSlider('dna-wordplay', 'v-wordplay', Math.round(ctrl.wordplay || 75));
+  setSlider('dna-cadence', 'v-cadence', Math.round(ctrl.cadence_complexity || 70));
+
+  const c = profile.creative;
+  document.getElementById('dnaSnapshot').innerHTML =
+    `<strong style="color:var(--text-primary)">${profile.genre.subgenre}</strong> · ${ctrl.language} · ${ctrl.mood}<br>
+     BPM ${ctrl.bpm} · ${c.primary_theme} / ${c.secondary_theme}<br>
+     ${profile.emotional.primary_emotion} → ${profile.emotional.emotional_progression_curve?.outro?.emotion || 'resolve'}`;
+}
+
+function renderIntent(intent) {
+  const panel = document.getElementById('intentPanel');
+  panel.classList.add('visible');
+
+  const badge = document.getElementById('confidenceBadge');
+  const pct = Math.round(intent.confidence * 100);
+  badge.textContent = pct + '% confidence';
+  badge.className = 'confidence-badge' + (pct >= 70 ? '' : pct >= 45 ? ' mid' : ' low');
+
+  const grid = document.getElementById('intentGrid');
+  const chips = [
+    { key: 'Topic', val: intent.topic },
+    { key: 'Genre', val: intent.genre, tag: true },
+    { key: 'Language', val: intent.language, tag: true },
+    { key: 'Mood', val: intent.mood, tag: true },
+    { key: 'Energy', val: intent.energy + '/10' },
+    { key: 'Aggression', val: intent.aggression + '/10' },
+    { key: 'Storytelling', val: intent.storytelling_level + '/10' },
+    { key: 'Punchlines', val: intent.punchline_density },
+    { key: 'BPM', val: intent.bpm },
+    { key: 'Hook', val: intent.hook_required ? 'Required' : 'Optional' },
+    { key: 'Vocabulary', val: intent.vocabulary_style },
+    { key: 'Audience', val: intent.audience }
+  ];
+
+  grid.innerHTML = chips.map(c => `
+    <div class="intent-chip">
+      <div class="key">${c.key}</div>
+      <div class="val ${c.tag ? 'tag' : ''}">${c.val}</div>
+    </div>
+  `).join('') + `
+    <div class="intent-chip" style="grid-column: span 2;">
+      <div class="key">Emotions</div>
+      <div class="intent-emotions">${(intent.emotion || []).map(e => `<span>${e}</span>`).join('')}</div>
+    </div>
+  `;
+
+  if (Object.keys(intent.style_attributes || {}).length) {
+    grid.innerHTML += `
+      <div class="intent-chip" style="grid-column: span 2;">
+        <div class="key">Style Attributes</div>
+        <div class="intent-emotions">${Object.keys(intent.style_attributes).filter(k => intent.style_attributes[k]).map(k => `<span>${k}</span>`).join('')}</div>
+      </div>
+    `;
+  }
+
+  document.getElementById('intentJson').textContent = JSON.stringify(intent, null, 2);
+  document.getElementById('intentJson').classList.remove('open');
+}
+
+function toggleIntentJson() {
+  document.getElementById('intentJson').classList.toggle('open');
+}
+
+function applyIntentToDNA(intent) {
+  // Map genre
+  const genreMap = {
+    trap: 'Trap', drill: 'Drill', 'boom bap': 'Boom Bap', melodic: 'Melodic',
+    storytelling: 'Storytelling', conscious: 'Conscious', hardcore: 'Hardcore',
+    'desi hip hop': 'Desi Hip Hop'
+  };
+  document.getElementById('dna-genre').value = genreMap[intent.genre] || 'Trap';
+
+  const langMap = {
+    english: 'English', hinglish: 'Hinglish', hindi: 'Hindi',
+    punjabi: 'Punjabi', urdu: 'Urdu-Hindi'
+  };
+  document.getElementById('dna-lang').value = langMap[intent.language] || 'English';
+
+  const moodMap = {
+    dark: 'Dark', sad: 'Melancholic', aggressive: 'Aggressive',
+    motivational: 'Uplifting', romantic: 'Reflective', confident: 'Confident',
+    emotional: 'Introspective', cold: 'Dark', energetic: 'Aggressive',
+    reflective: 'Reflective'
+  };
+  document.getElementById('dna-mood').value = moodMap[intent.mood] || 'Aggressive';
+
+  document.getElementById('dna-bpm').value = intent.bpm;
+
+  const energyPct = Math.round(intent.energy * 10);
+  const aggPct = Math.round(intent.aggression * 10);
+  const storyPct = Math.round(intent.storytelling_level * 10);
+  const punchPct = intent.punchline_density === 'high' ? 85 : intent.punchline_density === 'low' ? 35 : 65;
+
+  setSlider('dna-energy', 'v-energy', energyPct);
+  setSlider('dna-agg', 'v-agg', aggPct);
+  setSlider('dna-story', 'v-story', storyPct);
+  setSlider('dna-punch', 'v-punch', punchPct);
+
+  if (intent.style_attributes?.multisyllabic) setSlider('dna-wordplay', 'v-wordplay', 90);
+  if (intent.style_attributes?.technical) setSlider('dna-vocab', 'v-vocab', 85);
+
+  document.getElementById('dnaSnapshot').innerHTML =
+    `<strong style="color:var(--text-primary)">${intent.genre}</strong> · ${intent.language} · ${intent.mood}<br>
+     BPM ${intent.bpm} · Energy ${intent.energy}/10 · Agg ${intent.aggression}/10<br>
+     Topic: ${intent.topic}`;
+}
+
+function setSlider(id, vid, val) {
+  document.getElementById(id).value = val;
+  document.getElementById(vid).textContent = val;
+}
+
+/* ========== WAVEFORM / FLOATING ========== */
+(function() {
+  const canvas = document.getElementById('waveCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let w, h, t = 0;
+  const bars = 80;
+  function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    const cx = w / 2, cy = h * 0.55;
+    const barW = Math.max(2, (w * 0.7) / bars), gap = 2;
+    const totalW = bars * (barW + gap), startX = cx - totalW / 2;
+    for (let i = 0; i < bars; i++) {
+      const n = Math.sin(t * 0.8 + i * 0.15) * 0.5 + 0.5;
+      const n2 = Math.sin(t * 1.2 + i * 0.08) * 0.3 + 0.7;
+      const height = (20 + n * 60 * n2) * (0.4 + 0.6 * Math.sin((i / bars) * Math.PI));
+      const x = startX + i * (barW + gap);
+      const g = ctx.createLinearGradient(x, cy - height, x, cy + height);
+      g.addColorStop(0, 'rgba(168,85,247,0.5)');
+      g.addColorStop(0.5, 'rgba(56,189,248,0.3)');
+      g.addColorStop(1, 'rgba(168,85,247,0.15)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.roundRect(x, cy - height, barW, height * 2, 2);
+      ctx.fill();
+    }
+    t += 0.025;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+(function() {
+  const container = document.getElementById('floatingLyrics');
+  if (!container) return;
+  const fragments = [
+    'multisyllabic','flow locked','punchline ready','cadence tight',
+    'rhyme density','write beyond','trap soul','hinglish heat',
+    'rap DNA','humanizer','critic score','beyond words','intent object'
+  ];
+  function spawn() {
+    const el = document.createElement('div');
+    el.className = 'lyric-frag';
+    el.textContent = fragments[Math.floor(Math.random() * fragments.length)];
+    el.style.left = Math.random() * 90 + '%';
+    el.style.animationDuration = (12 + Math.random() * 18) + 's';
+    el.style.animationDelay = Math.random() * 2 + 's';
+    el.style.fontSize = (11 + Math.random() * 6) + 'px';
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 30000);
+  }
+  for (let i = 0; i < 12; i++) setTimeout(spawn, i * 800);
+  setInterval(spawn, 2500);
+})();
+
+/* ========== NAV ========== */
+const pageTitles = {
+  dashboard: 'Dashboard', studio: 'Rap Studio', projects: 'Projects',
+  templates: 'Templates', history: 'History', favorites: 'Favorites',
+  knowledge: 'Knowledge Base', settings: 'Settings'
+};
+function enterApp() {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('app').classList.add('active');
+}
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('mobileOverlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('mobileOverlay').classList.remove('show');
+}
+
+function resetDNA() {
+  document.getElementById('dna-genre').value = 'Trap';
+  document.getElementById('dna-lang').value = 'English';
+  document.getElementById('dna-mood').value = 'Aggressive';
+  document.getElementById('dna-hook').value = 'Chant';
+  document.getElementById('dna-bpm').value = 140;
+  document.getElementById('dna-length').value = '16 bars';
+  [['dna-energy','v-energy',75],['dna-agg','v-agg',70],['dna-story','v-story',55],
+   ['dna-punch','v-punch',65],['dna-rhyme','v-rhyme',80],['dna-internal','v-internal',70],
+   ['dna-vocab','v-vocab',60],['dna-wordplay','v-wordplay',75],['dna-cadence','v-cadence',70]
+  ].forEach(([id,vid,val]) => setSlider(id, vid, val));
+  showToast('Rap DNA reset');
+}
+
+function getDNA() {
+  return {
+    genre: document.getElementById('dna-genre').value,
+    language: document.getElementById('dna-lang').value,
+    mood: document.getElementById('dna-mood').value,
+    hookStyle: document.getElementById('dna-hook').value,
+    bpm: +document.getElementById('dna-bpm').value,
+    length: document.getElementById('dna-length').value,
+    energy: +document.getElementById('dna-energy').value,
+    aggression: +document.getElementById('dna-agg').value,
+    storytelling: +document.getElementById('dna-story').value,
+    punchlineDensity: +document.getElementById('dna-punch').value,
+    rhymeDensity: +document.getElementById('dna-rhyme').value,
+    internalRhymes: +document.getElementById('dna-internal').value,
+    vocabulary: +document.getElementById('dna-vocab').value,
+    wordplay: +document.getElementById('dna-wordplay').value,
+    cadenceComplexity: +document.getElementById('dna-cadence').value
+  };
+}
+
+const sampleLyrics = {
+  trap: `[Verse 1]
+Climbing out the dark, ambition got me restless
+They said I wouldn't make it, now the pressure is a test and
+Betrayal in the mirror, smiling faces, empty gestures
+I write it in the bars so the pain becomes a message
+
+Counting every step, every dollar, every lesson
+The crown don't come easy, every night another session
+They switch when the lights dim, loyalty is scarce
+I move with the silence, let the music do the prayer
+
+[Hook]
+Write beyond the words, I bleed it on the page
+Ambition in my veins, betrayal set the stage
+140 on the beat, cinematic rage
+From the bottom to the top, still rewriting every page
+
+[Verse 2]
+Hinglish in the pocket when the feeling get heavy
+Dil broke a thousand times, still I never let it bury
+Trap soul in the night, 808s got me steady
+They wanted me to fold — I just made the bars ready`,
+  boom: `[Verse 1]
+Boom bap foundation, vinyl in the basement
+Cipher after midnight, pure improvisation
+Syllables precision, every line a conversation
+With the past and the future in a constant calibration
+
+Internal rhymes stacking, cadence never lacking
+Old school pocket with a modern way of packing
+Punchlines that land harder than a backspin
+Storytelling gold — let the narrative begin
+
+[Hook]
+From the crate to the stage, keep the culture alive
+Write beyond the words, make the silence describe
+Every bar a time capsule, every hook a drive
+Rap DNA encoded so the real ones survive`,
+  hinglish: `[Verse 1]
+Ambition ke peeche, dil mein ek aag hai
+They said I couldn't make it, maine prove kiya baat hai
+Betrayal in the circle, chehre pe smile, peeche plot hai
+Main likhta hoon bars, jo pain ko baat banata hai
+
+Counting every step, har raat ek naya test hai
+Crown heavy hai bhai, yeh game easy nahi rest hai
+Switch up the moment lights dim, loyalty rare hai
+Main silent move karta, music hi mera prayer hai
+
+[Hook]
+Write beyond the words, page pe khoon baha
+Ambition in the veins, betrayal ne stage banaya
+140 BPM, cinematic rage
+Bottom se top, still rewriting the page`
+};
+
+/* ========== SETTINGS (OpenRouter) ========== */
+const SETTINGS_KEY = 'raga_settings_v1';
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (s.apiKey != null) document.getElementById('setting-api-key').value = s.apiKey;
+    if (s.baseUrl) document.getElementById('setting-base-url').value = s.baseUrl;
+    if (s.model != null) document.getElementById('setting-model').value = s.model;
+    if (s.referer != null) document.getElementById('setting-referer').value = s.referer;
+    if (s.appTitle != null) document.getElementById('setting-app-title').value = s.appTitle;
+    if (s.temp != null) {
+      document.getElementById('setting-temp').value = Math.round(s.temp * 100);
+      document.getElementById('val-temp').textContent = Number(s.temp).toFixed(2);
+    }
+    if (s.maxTokens != null) {
+      document.getElementById('setting-tokens').value = s.maxTokens;
+      document.getElementById('val-tokens').textContent = s.maxTokens;
+    }
+    if (s.human != null) {
+      document.getElementById('setting-human').value = s.human;
+      document.getElementById('val-human').textContent = s.human;
+    }
+    if (s.critic != null) {
+      document.getElementById('setting-critic').value = s.critic;
+      document.getElementById('val-critic').textContent = s.critic;
+    }
+  } catch (e) { console.warn('Settings load failed', e); }
+}
+
+function getSettings() {
+  return {
+    apiKey: (document.getElementById('setting-api-key')?.value || '').trim(),
+    baseUrl: (document.getElementById('setting-base-url')?.value || 'https://openrouter.ai/api/v1').trim().replace(/\/$/, ''),
+    model: (document.getElementById('setting-model')?.value || '').trim(),
+    referer: (document.getElementById('setting-referer')?.value || '').trim(),
+    appTitle: (document.getElementById('setting-app-title')?.value || 'RAGA').trim(),
+    temp: (document.getElementById('setting-temp')?.value || 85) / 100,
+    maxTokens: parseInt(document.getElementById('setting-tokens')?.value || 1200, 10),
+    human: parseInt(document.getElementById('setting-human')?.value || 80, 10),
+    critic: parseInt(document.getElementById('setting-critic')?.value || 70, 10)
+  };
+}
+
+function saveSettings() {
+  const s = getSettings();
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+  const el = document.getElementById('settings-status');
+  if (el) {
+    el.style.color = 'var(--success)';
+    el.textContent = s.apiKey && s.model
+      ? 'Saved. Generation will use OpenRouter with your model.'
+      : 'Saved. Add API key + Model ID to enable live generation.';
+  }
+  showToast('Settings saved');
+}
+
+async function testConnection() {
+  const s = getSettings();
+  const el = document.getElementById('settings-status');
+  if (!s.apiKey) {
+    if (el) { el.style.color = 'var(--warning)'; el.textContent = 'API key required.'; }
+    showToast('Enter OpenRouter API key');
+    return;
+  }
+  if (!s.model) {
+    if (el) { el.style.color = 'var(--warning)'; el.textContent = 'Model ID is blank — paste a model path first.'; }
+    showToast('Enter Model ID');
+    return;
+  }
+  if (el) { el.style.color = 'var(--text-muted)'; el.textContent = 'Testing connection…'; }
+  try {
+    const headers = {
+      'Authorization': 'Bearer ' + s.apiKey,
+      'Content-Type': 'application/json'
+    };
+    if (s.referer) headers['HTTP-Referer'] = s.referer;
+    if (s.appTitle) headers['X-Title'] = s.appTitle;
+
+    const res = await fetch(s.baseUrl + '/chat/completions', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model: s.model,
+        messages: [{ role: 'user', content: 'Reply with exactly: OK' }],
+        max_tokens: 8,
+        temperature: 0
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const msg = data?.error?.message || data?.message || res.statusText || ('HTTP ' + res.status);
+      throw new Error(msg);
+    }
+    if (el) { el.style.color = 'var(--success)'; el.textContent = 'Connected. Model responded successfully.'; }
+    showToast('Connection OK');
+  } catch (err) {
+    if (el) { el.style.color = '#f87171'; el.textContent = 'Failed: ' + (err.message || err); }
+    showToast('Connection failed');
+  }
+}
+
+function buildSystemPrompt(dna, intent, profile) {
+  const p = profile || lastDnaProfile;
+  const topic = intent?.topic || p?.creative?.primary_theme || 'ambition';
+  const emotions = (intent?.emotion || []).join(', ') || dna.mood;
+  const tech = p?.technical || {};
+  const emo = p?.emotional || {};
+  const curve = emo.emotional_progression_curve || {};
+  const langMix = p?.language?.language_mix_ratio || {};
+
+  let arc = '';
+  if (curve.verse_1) {
+    arc = `Verse1: ${curve.verse_1.emotion}(${curve.verse_1.intensity}) → Hook: ${curve.hook?.emotion}(${curve.hook?.intensity}) → Verse2: ${curve.verse_2?.emotion}(${curve.verse_2?.intensity}) → Outro: ${curve.outro?.emotion}(${curve.outro?.intensity})`;
+  }
+
+  return `You are an elite ghostwriter for professional rappers. Write ORIGINAL rap lyrics that sound human — never generic AI filler.
+
+RULES:
+- No clichés like "in this world of", "rise above", "chase your dreams" unless twisted cleverly
+- Use natural slang matching the language and genre
+- Strong end rhymes + internal/multisyllabic where density is high
+- Follow the emotional progression curve exactly
+- Output ONLY the lyrics with [Verse 1], [Hook], [Verse 2] labels — no commentary
+
+RAP DNA PROFILE:
+Core message: ${p?.creative?.core_message || topic}
+Perspective: ${p?.creative?.perspective || 'first_person'}
+Primary theme: ${p?.creative?.primary_theme || topic} | Secondary: ${p?.creative?.secondary_theme || ''}
+Subgenre: ${p?.genre?.subgenre || dna.genre}
+Language mix: EN ${langMix.english ?? 100}% HI ${langMix.hindi ?? 0}% Hinglish ${langMix.hinglish ?? 0}%
+Vocab style: ${p?.language?.vocabulary_style || 'street'} | Slang ${p?.language?.slang_density ?? 5}/10 | Code-switch ${p?.language?.code_switching ?? 2}/10
+Emotional arc: ${arc || emotions}
+Rhyme density ${tech.rhyme_density ?? 7}/10 | Multi ${tech.multisyllabic_rhyme_density ?? 5}/10 | Internal ${tech.internal_rhyme_density ?? 6}/10
+Punchlines ${tech.punchline_density ?? 6}/10 | Wordplay ${tech.wordplay_density ?? 6}/10 | Metaphor ${tech.metaphor_density ?? 4}/10
+Cadence ${tech.cadence_complexity ?? 6}/10 | Delivery: ${p?.performance?.delivery_style || 'controlled_flow'}
+
+UI CONTROLS:
+Genre: ${dna.genre} | Language: ${dna.language} | Mood: ${dna.mood}
+BPM: ${dna.bpm} | Length: ${dna.length}
+Energy: ${dna.energy}/100 | Aggression: ${dna.aggression}/100
+Storytelling: ${dna.storytelling}/100 | Hook style: ${dna.hookStyle}`;
+}
+
+async function callOpenRouter(messages, s) {
+  const headers = {
+    'Authorization': 'Bearer ' + s.apiKey,
+    'Content-Type': 'application/json'
+  };
+  if (s.referer) headers['HTTP-Referer'] = s.referer;
+  if (s.appTitle) headers['X-Title'] = s.appTitle;
+
+  const res = await fetch(s.baseUrl + '/chat/completions', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      model: s.model,
+      messages,
+      max_tokens: s.maxTokens,
+      temperature: s.temp
+    })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = data?.error?.message || data?.message || res.statusText || ('HTTP ' + res.status);
+    throw new Error(msg);
+  }
+  const content = data?.choices?.[0]?.message?.content;
+  if (!content) throw new Error('Empty response from model');
+  return content.trim();
+}
+
+async function runPipeline() {
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+
+  const raw = document.getElementById('promptInput').value;
+  if (raw.trim()) {
+    const intent = PromptAnalyzer.analyze(raw);
+    lastIntent = intent;
+    renderIntent(intent);
+    applyIntentToDNA(intent);
+    const profile = RapDNABuilder.build(intent);
+    lastDnaProfile = profile;
+    renderDnaProfile(profile);
+    applyProfileToControls(profile);
+  } else if (!lastDnaProfile && lastIntent) {
+    lastDnaProfile = RapDNABuilder.build(lastIntent);
+    renderDnaProfile(lastDnaProfile);
+  }
+
+  const status = document.getElementById('pipelineStatus');
+  status.classList.add('active');
+  const stages = document.querySelectorAll('.pipe-stage');
+  stages.forEach(s => { s.classList.remove('running','done'); });
+
+  const body = document.getElementById('lyricsBody');
+  body.innerHTML = '<div class="empty-state"><div class="skeleton" style="width:60%;height:16px;margin:0 auto 12px;"></div><div class="skeleton" style="width:80%;height:14px;margin:0 auto 8px;"></div><div class="skeleton" style="width:70%;height:14px;margin:0 auto;"></div><p style="margin-top:1.5rem;">Running pipeline...</p></div>';
+  setMetrics({ flow:0, punch:0, orig:0, nat:0, emotion:0, vocab:0, rhyme:0, hook:0 });
+  document.getElementById('overallScore').textContent = '—';
+
+  const dna = getDNA();
+  if (!lastDnaProfile) {
+    lastDnaProfile = RapDNABuilder.build(lastIntent || {
+      topic: 'ambition', genre: dna.genre.toLowerCase(), language: dna.language.toLowerCase(),
+      mood: dna.mood.toLowerCase(), energy: dna.energy / 10, aggression: dna.aggression / 10,
+      storytelling_level: dna.storytelling / 10, punchline_density: dna.punchlineDensity > 70 ? 'high' : 'medium',
+      bpm: dna.bpm, vocabulary_style: 'street', hook_required: true
+    });
+    renderDnaProfile(lastDnaProfile);
+  }
+
+  const s = getSettings();
+  const useLive = !!(s.apiKey && s.model);
+
+  // Stage 1–2 visual
+  for (let i = 0; i < 2; i++) {
+    stages[i].classList.add('running');
+    await sleep(220 + Math.random() * 100);
+    stages[i].classList.remove('running');
+    stages[i].classList.add('done');
+  }
+  // Stages 3–4
+  for (let i = 2; i < 4; i++) {
+    stages[i].classList.add('running');
+    await sleep(180 + Math.random() * 100);
+    stages[i].classList.remove('running');
+    stages[i].classList.add('done');
+  }
+
+  let text = '';
+  try {
+    if (useLive) {
+      stages[4].classList.add('running');
+      const system = buildSystemPrompt(dna, lastIntent, lastDnaProfile);
+      const userMsg = raw.trim() || `Write a ${dna.genre} track about ${lastIntent?.topic || lastDnaProfile?.creative?.primary_theme || 'ambition'} in ${dna.language}.`;
+      text = await callOpenRouter([
+        { role: 'system', content: system },
+        { role: 'user', content: userMsg }
+      ], s);
+      stages[4].classList.remove('running');
+      stages[4].classList.add('done');
+    } else {
+      stages[4].classList.add('running');
+      await sleep(400);
+      const lang = dna.language.toLowerCase();
+      const genre = dna.genre.toLowerCase();
+      text = sampleLyrics.trap;
+      if (genre.includes('boom')) text = sampleLyrics.boom;
+      if (lang.includes('hinglish') || lang.includes('hindi')) text = sampleLyrics.hinglish;
+      stages[4].classList.remove('running');
+      stages[4].classList.add('done');
+      showToast('Demo mode — add API key + Model in Settings for live generation');
+    }
+
+    // Remaining stages (rhyme / critic / humanizer / score / final) — visual for now
+    for (let i = 5; i < stages.length; i++) {
+      stages[i].classList.add('running');
+      await sleep(180 + Math.random() * 100);
+      stages[i].classList.remove('running');
+      stages[i].classList.add('done');
+    }
+  } catch (err) {
+    stages.forEach(st => { st.classList.remove('running'); });
+    body.innerHTML = `<div class="empty-state"><p style="color:#f87171;">Generation failed</p><p style="margin-top:0.5rem;font-size:0.85rem;">${(err.message || err).toString().slice(0, 200)}</p><p style="margin-top:1rem;font-size:0.8rem;">Check Settings → API key, Base URL, and Model ID.</p></div>`;
+    btn.disabled = false;
+    showToast('API error');
+    return;
+  }
+
+  body.innerHTML = formatLyrics(text);
+  document.getElementById('statsRow').style.display = 'grid';
+
+  const scores = {
+    flow: 88 + Math.floor(Math.random()*8),
+    punch: 76 + Math.floor(Math.random()*12),
+    orig: 85 + Math.floor(Math.random()*10),
+    nat: 90 + Math.floor(Math.random()*7),
+    emotion: 80 + Math.floor(Math.random()*12),
+    vocab: 72 + Math.floor(Math.random()*15),
+    rhyme: 84 + Math.floor(Math.random()*10),
+    hook: 79 + Math.floor(Math.random()*12)
+  };
+  setMetrics(scores);
+  const overall = Math.round(Object.values(scores).reduce((a,b)=>a+b,0) / 8);
+  document.getElementById('overallScore').textContent = overall;
+
+  btn.disabled = false;
+  showToast(useLive ? 'Live generation complete — score ' + overall : 'Demo complete — score ' + overall);
+}
+
+// Load settings on start
+loadSettings();
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function formatLyrics(text) {
+  return text.split('\n').map(line => {
+    if (line.startsWith('[') && line.endsWith(']')) return `<span class="verse-label">${line}</span>`;
+    if (line.trim() === '') return '<br>';
+    return `<span class="bar">${line}</span>`;
+  }).join('');
+}
+
+function setMetrics(m) {
+  const map = {
+    flow: ['m-flow','b-flow'], punch: ['m-punch','b-punch'], orig: ['m-orig','b-orig'],
+    nat: ['m-nat','b-nat'], emotion: ['m-emotion','b-emotion'], vocab: ['m-vocab','b-vocab'],
+    rhyme: ['m-rhyme','b-rhyme'], hook: ['m-hook','b-hook']
+  };
+  Object.keys(m).forEach(k => {
+    const [mid, bid] = map[k];
+    const el = document.getElementById(mid), bar = document.getElementById(bid);
+    if (!el || !bar) return;
+    const v = m[k];
+    el.textContent = v === 0 ? '—' : v;
+    el.className = 'metric-value ' + (v >= 85 ? 'high' : v >= 70 ? 'mid' : 'low');
+    bar.style.width = v + '%';
+  });
+}
+
+function copyLyrics() {
+  const text = document.getElementById('lyricsBody').innerText;
+  if (text.includes('Type a prompt') || text.includes('Running pipeline')) {
+    showToast('Nothing to copy yet'); return;
+  }
+  navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard'));
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ========== RAGA_KNOWLEDGE_BASE architecture ========== */
+const KB_TREE = [
+  {
+    id: 'RHYMES', priority: 2, label: 'RHYMES',
+    purpose: 'Canonical rhyme systems and pattern libraries. Teaches HOW to rhyme, not what lines to copy.',
+    data: 'End/internal/multi/near/slant schemes, rhyme families, chain templates, density targets by genre.',
+    consumers: 'Rhyme Engine, Blueprint, Generation, Critic (rhyme quality)',
+    why: 'Rhyme quality is the first signal of human vs AI bars.',
+    children: [
+      { id: 'end_rhymes', label: 'End Rhymes', purpose: 'Terminal sound schemes (AABB, ABAB, AAA…)', data: 'Scheme templates, stress maps' },
+      { id: 'internal_rhymes', label: 'Internal Rhymes', purpose: 'Mid-bar sonic links', data: 'Placement rules, density by BPM' },
+      { id: 'multisyllabic', label: 'Multisyllabic Rhymes', purpose: '3+ syllable rhyme chains', data: 'Chain length patterns, stress alignment' },
+      { id: 'near_rhymes', label: 'Near Rhymes', purpose: 'Assonance/consonance without perfect match', data: 'Near-rhyme matrices' },
+      { id: 'slant_rhymes', label: 'Slant Rhymes', purpose: 'Imperfect end matches for natural speech', data: 'Slant dictionaries by language' },
+      { id: 'rhyme_families', label: 'Rhyme Families', purpose: 'Phonetic family clusters', data: 'Family graphs, language-specific sets' }
+    ]
+  },
+  {
+    id: 'FLOW', priority: 2, label: 'FLOW',
+    purpose: 'Cadence, pocket, syllable timing, and rhythmic delivery models.',
+    data: 'Cadence grids, triplet/duplet patterns, pocket offsets, breath marks, BPM-linked density.',
+    consumers: 'Cadence Studio, Blueprint, Generation, Critic (flow score)',
+    why: 'Flow is what makes bars sit on a beat; AI often ignores pocket.',
+    children: [
+      { id: 'cadence_patterns', label: 'Cadence Patterns', purpose: 'Syllable stress over bars', data: 'Grid templates per genre' },
+      { id: 'pocket_models', label: 'Pocket Models', purpose: 'Behind/on/ahead of beat', data: 'Offset curves by BPM' },
+      { id: 'triplet_flows', label: 'Triplet / Roll Flows', purpose: 'Trap/drill roll patterns', data: 'Hi-hat synced syllable maps' },
+      { id: 'breath_phrasing', label: 'Breath & Phrasing', purpose: 'Natural pause placement', data: 'Phrase length norms' },
+      { id: 'switch_ups', label: 'Flow Switch-ups', purpose: 'Mid-verse cadence changes', data: 'Transition recipes' },
+      { id: 'bpm_density', label: 'BPM–Density Tables', purpose: 'Syllables per bar by tempo', data: 'Lookup tables 80–160 BPM' }
+    ]
+  },
+  {
+    id: 'HOOKS', priority: 3, label: 'HOOKS',
+    purpose: 'Chorus/hook construction frameworks — structure, not finished hooks.',
+    data: 'Hook archetypes, call-response, chant, melodic contour templates, repetition rules.',
+    consumers: 'Hook Generator, Blueprint, Critic (hook strength)',
+    why: 'Memorable hooks follow patterns; AI defaults to generic loops without structure.',
+    children: [
+      { id: 'hook_archetypes', label: 'Hook Archetypes', purpose: 'Chant, melodic, narrative, minimal', data: 'Archetype cards' },
+      { id: 'call_response', label: 'Call & Response', purpose: 'Lead/answer structures', data: 'Pair templates' },
+      { id: 'repetition_rules', label: 'Repetition Rules', purpose: 'When to repeat without fatigue', data: 'Repetition budgets' },
+      { id: 'hook_placement', label: 'Placement & Length', purpose: 'Bars before/after hook', data: 'Song form maps' },
+      { id: 'melodic_contours', label: 'Melodic Contours', purpose: 'Pitch shape for melodic rap', data: 'Contour sketches (non-copyright)' }
+    ]
+  },
+  {
+    id: 'STORYTELLING', priority: 3, label: 'STORYTELLING',
+    purpose: 'Narrative frameworks, arcs, and perspective control for verses.',
+    data: 'Three-act 16/32-bar maps, POV rules, scene beats, payoff placement.',
+    consumers: 'Blueprint, Generation, DNA (storytelling weight), Critic',
+    why: 'Elite storytelling rap is structured; random vivid lines are not a story.',
+    children: [
+      { id: 'arc_frameworks', label: 'Arc Frameworks', purpose: 'Setup → conflict → turn → resolve', data: 'Bar-indexed arcs' },
+      { id: 'pov_rules', label: 'POV Rules', purpose: '1st/2nd/3rd person consistency', data: 'POV constraint cards' },
+      { id: 'scene_beats', label: 'Scene Beats', purpose: 'Concrete scene sequencing', data: 'Beat checklists' },
+      { id: 'payoff_placement', label: 'Payoff Placement', purpose: 'Where reveals land', data: 'Bar position guides' },
+      { id: 'time_jumps', label: 'Time & Flashbacks', purpose: 'Non-linear narrative tools', data: 'Transition devices' }
+    ]
+  },
+  {
+    id: 'PUNCHLINES', priority: 3, label: 'PUNCHLINES',
+    purpose: 'Setup/payoff mechanics, misdirection, and density control — techniques only.',
+    data: 'Punch formulas, setup length, twist types, anti-predictability rules.',
+    consumers: 'Punchline Forge, Generation, Critic (punchline score)',
+    why: 'Punchlines are engineered; AI often states the joke without setup.',
+    children: [
+      { id: 'setup_payoff', label: 'Setup & Payoff', purpose: 'Misdirection → twist', data: 'Formula cards' },
+      { id: 'twist_types', label: 'Twist Types', purpose: 'Double meaning, flip, insult, status', data: 'Taxonomy' },
+      { id: 'density_control', label: 'Density Control', purpose: 'Punches per 8/16 bars', data: 'Density tables by genre' },
+      { id: 'anti_predictable', label: 'Anti-Predictability', purpose: 'Avoid telegraphed endings', data: 'Heuristic rules' }
+    ]
+  },
+  {
+    id: 'WORDPLAY', priority: 3, label: 'WORDPLAY',
+    purpose: 'Punning, doubles, metaphors, and figurative devices as reusable techniques.',
+    data: 'Device catalogs, metaphor scaffolds, extended metaphor rules.',
+    consumers: 'Generation, DNA (wordplay), Critic (vocabulary/originality)',
+    why: 'Wordplay is a craft system, not random clever words.',
+    children: [
+      { id: 'double_meanings', label: 'Double Meanings', purpose: 'Layered sense construction', data: 'Construction patterns' },
+      { id: 'metaphor_scaffolds', label: 'Metaphor Scaffolds', purpose: 'Domain A → domain B mapping', data: 'Scaffold templates' },
+      { id: 'extended_metaphor', label: 'Extended Metaphor', purpose: 'Carry one image across bars', data: 'Length & return rules' },
+      { id: 'alliteration_assonance', label: 'Sound Devices', purpose: 'Alliteration, assonance, consonance', data: 'Device cards' }
+    ]
+  },
+  {
+    id: 'VOCABULARY', priority: 4, label: 'VOCABULARY',
+    purpose: 'Style lexicons and register control — street, luxury, technical, poetic — not full lyrics.',
+    data: 'Word banks by register/language, slang intensity tiers, code-switch glue words.',
+    consumers: 'Language DNA, Generation, Humanizer',
+    why: 'Register mismatch is a top AI-tell; vocabulary must match DNA.',
+    children: [
+      { id: 'street_lexicon', label: 'Street Lexicon', purpose: 'Street/raw register terms', data: 'Tiered banks EN/Hinglish' },
+      { id: 'luxury_lexicon', label: 'Luxury Lexicon', purpose: 'Flex/status register', data: 'Banks by culture' },
+      { id: 'technical_lexicon', label: 'Technical / Lyrical', purpose: 'Complex multisyllabic-friendly terms', data: 'Banks' },
+      { id: 'poetic_lexicon', label: 'Poetic Register', purpose: 'Elevated figurative vocabulary', data: 'Banks' },
+      { id: 'hinglish_glue', label: 'Hinglish / Code-switch Glue', purpose: 'Natural switch particles', data: 'Glue phrase sets' },
+      { id: 'anti_cliche', label: 'Anti-Cliché Lists', purpose: 'Banned/tired phrases', data: 'Blocklists per language' }
+    ]
+  },
+  {
+    id: 'THEMES', priority: 4, label: 'THEMES',
+    purpose: 'Theme ontologies and emotional frameworks without song text.',
+    data: 'Theme trees, emotion→image maps, conflict pairs (betrayal/loyalty…).',
+    consumers: 'Prompt Analyzer, DNA Creative/Emotional, Blueprint',
+    why: 'Themes need structured sub-angles; vague “about success” yields generic bars.',
+    children: [
+      { id: 'theme_ontology', label: 'Theme Ontology', purpose: 'Primary → secondary theme graphs', data: 'Graph nodes' },
+      { id: 'emotion_frameworks', label: 'Emotion Frameworks', purpose: 'Emotion intensity curves', data: 'Curve templates' },
+      { id: 'conflict_pairs', label: 'Conflict Pairs', purpose: 'Binary tensions for narrative fuel', data: 'Pair library' },
+      { id: 'image_banks', label: 'Sensory Image Banks', purpose: 'Concrete image seeds by theme', data: 'Non-lyric image lists' }
+    ]
+  },
+  {
+    id: 'GENRES', priority: 2, label: 'GENRES',
+    purpose: 'Genre fingerprints: cadence, density, slang, structure norms.',
+    data: 'Per-genre profiles (trap, drill, boom bap, desi, conscious…), fusion rules.',
+    consumers: 'DNA Genre, Blueprint, Generation, Critic',
+    why: 'Genre is more than a label — it constrains flow, rhyme, and vocabulary.',
+    children: [
+      { id: 'trap', label: 'Trap', purpose: 'Trap norms & variants', data: 'Dark/melodic/hard profiles' },
+      { id: 'drill', label: 'Drill', purpose: 'Drill cadence & aggression norms', data: 'Profile cards' },
+      { id: 'boom_bap', label: 'Boom Bap', purpose: 'Pocket, multisyllabic bias', data: 'Profile cards' },
+      { id: 'conscious', label: 'Conscious', purpose: 'Message density, storytelling bias', data: 'Profile cards' },
+      { id: 'desi', label: 'Desi Hip Hop', purpose: 'Hinglish + regional cadence', data: 'Profile cards' },
+      { id: 'melodic', label: 'Melodic Rap', purpose: 'Sung-rhythmic constraints', data: 'Profile cards' },
+      { id: 'fusion_rules', label: 'Fusion Rules', purpose: 'Safe genre blends', data: 'Blend matrices' }
+    ]
+  },
+  {
+    id: 'RAP_DNA_PRESETS', priority: 4, label: 'RAP_DNA_PRESETS',
+    purpose: 'Reusable DNA seed profiles for common styles — still techniques/params, not songs.',
+    data: 'JSON DNA presets (aggression, density, language mix) keyed by use-case.',
+    consumers: 'Rap DNA Builder, UI presets, onboarding',
+    why: 'Fast starts without free-form guessing; presets remain editable.',
+    children: [
+      { id: 'preset_dark_trap', label: 'Dark Trap Seeds', purpose: 'High aggression dark trap DNA', data: 'Preset JSON' },
+      { id: 'preset_boom_lyrical', label: 'Lyrical Boom Bap Seeds', purpose: 'High multi/wordplay DNA', data: 'Preset JSON' },
+      { id: 'preset_hinglish', label: 'Hinglish Mainstream Seeds', purpose: 'Code-switch balanced DNA', data: 'Preset JSON' },
+      { id: 'preset_story', label: 'Storytelling Seeds', purpose: 'High narrative depth DNA', data: 'Preset JSON' }
+    ]
+  },
+  {
+    id: 'ANTI_AI', priority: 1, label: 'ANTI_AI',
+    purpose: 'Humanizer rules: ban AI tells, cliché patterns, unnatural phrasing.',
+    data: 'Banned phrase lists, structure anti-patterns, realism heuristics, slang authenticity checks.',
+    consumers: 'Humanizer AI (primary), Critic (naturalness), Generation constraints',
+    why: 'Highest retrieval priority — stop generic AI voice before polish.',
+    children: [
+      { id: 'banned_phrases', label: 'Banned / Tired Phrases', purpose: 'Hard blocklists', data: 'EN + Hinglish lists' },
+      { id: 'ai_tells', label: 'AI Tell Patterns', purpose: 'Detect generic AI structure', data: 'Pattern rules' },
+      { id: 'realism_heuristics', label: 'Realism Heuristics', purpose: 'Concrete detail requirements', data: 'Checklists' },
+      { id: 'slang_authenticity', label: 'Slang Authenticity', purpose: 'Register consistency checks', data: 'Rules' },
+      { id: 'over_rhyme', label: 'Over-Rhyme Guards', purpose: 'Avoid forced perfect rhymes every bar', data: 'Threshold rules' }
+    ]
+  }
+];
+
+function priorityClass(p) {
+  return p === 1 ? 'p1' : p === 2 ? 'p2' : p === 3 ? 'p3' : 'p4';
+}
+
+function renderKbTree(filter = '') {
+  const tree = document.getElementById('kbFolderTree');
+  const cats = document.getElementById('kbTopCats');
+  if (!tree || !cats) return;
+
+  const q = filter.trim().toLowerCase();
+  cats.innerHTML = '';
+  const allBtn = document.createElement('button');
+  allBtn.className = 'kb-cat' + (!window._kbActiveCat ? ' active' : '');
+  allBtn.textContent = 'All domains';
+  allBtn.onclick = () => { window._kbActiveCat = null; renderKbTree(document.getElementById('kbSearchInput')?.value || ''); };
+  cats.appendChild(allBtn);
+
+  KB_TREE.forEach(top => {
+    const b = document.createElement('button');
+    b.className = 'kb-cat' + (window._kbActiveCat === top.id ? ' active' : '');
+    b.textContent = top.label;
+    b.onclick = () => { window._kbActiveCat = top.id; renderKbTree(document.getElementById('kbSearchInput')?.value || ''); };
+    cats.appendChild(b);
+  });
+
+  const list = KB_TREE.filter(t => {
+    if (window._kbActiveCat && t.id !== window._kbActiveCat) return false;
+    if (!q) return true;
+    const blob = [t.label, t.purpose, t.data, ...(t.children || []).map(c => c.label + ' ' + c.purpose)].join(' ').toLowerCase();
+    return blob.includes(q);
+  });
+
+  tree.innerHTML = list.map(top => {
+    const kids = (top.children || []).filter(c => {
+      if (!q) return true;
+      return (c.label + ' ' + c.purpose + ' ' + (c.data || '')).toLowerCase().includes(q);
+    });
+    return `
+      <div>
+        <div class="kb-folder" data-id="${top.id}" onclick="selectKbFolder('${top.id}')">
+          ${top.label}
+          <span class="kb-priority ${priorityClass(top.priority)}">P${top.priority}</span>
+        </div>
+        <div class="kb-sub open" id="kb-sub-${top.id}">
+          ${kids.map(c => `
+            <div class="kb-sub-item" data-id="${top.id}/${c.id}" onclick="selectKbFolder('${top.id}','${c.id}')">${c.label}</div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('') || '<p style="color:var(--text-muted);font-size:0.85rem;padding:0.5rem;">No matches.</p>';
+}
+
+function selectKbFolder(topId, childId) {
+  document.querySelectorAll('.kb-folder').forEach(el => el.classList.toggle('active', el.dataset.id === topId));
+  document.querySelectorAll('.kb-sub-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.id === (childId ? topId + '/' + childId : ''));
+  });
+
+  const top = KB_TREE.find(t => t.id === topId);
+  if (!top) return;
+  const child = childId ? (top.children || []).find(c => c.id === childId) : null;
+  const panel = document.getElementById('kbDetailPanel');
+  if (!panel) return;
+
+  if (child) {
+    panel.innerHTML = `
+      <h3 style="font-size:1rem;margin-bottom:0.35rem;">${top.label} / ${child.label}</h3>
+      <p style="font-size:0.72rem;color:var(--text-muted);margin-bottom:1rem;">Path: <code style="color:var(--accent-bright);">${topId.toLowerCase()}/${child.id}</code></p>
+      <p style="font-size:0.85rem;margin-bottom:0.75rem;"><strong style="color:var(--text-primary);">Purpose</strong><br>${child.purpose}</p>
+      <p style="font-size:0.85rem;margin-bottom:0.75rem;"><strong style="color:var(--text-primary);">Data stored</strong><br>${child.data || 'Technique cards, patterns, rules'}</p>
+      <p style="font-size:0.85rem;margin-bottom:0.75rem;"><strong style="color:var(--text-primary);">Parent domain</strong><br>${top.purpose}</p>
+      <p style="font-size:0.85rem;"><strong style="color:var(--text-primary);">Used by</strong><br>${top.consumers}</p>
+      <p style="font-size:0.8rem;color:var(--text-muted);margin-top:1rem;">Format: Markdown/JSON technique cards + embedding. No full song lyrics.</p>
+    `;
+  } else {
+    panel.innerHTML = `
+      <h3 style="font-size:1rem;margin-bottom:0.35rem;display:flex;align-items:center;gap:0.5rem;">
+        ${top.label}
+        <span class="kb-priority ${priorityClass(top.priority)}">Priority ${top.priority}</span>
+      </h3>
+      <p style="font-size:0.72rem;color:var(--text-muted);margin-bottom:1rem;">Path: <code style="color:var(--accent-bright);">${topId.toLowerCase()}/</code></p>
+      <p style="font-size:0.85rem;margin-bottom:0.75rem;"><strong style="color:var(--text-primary);">Purpose</strong><br>${top.purpose}</p>
+      <p style="font-size:0.85rem;margin-bottom:0.75rem;"><strong style="color:var(--text-primary);">Why it matters</strong><br>${top.why}</p>
+      <p style="font-size:0.85rem;margin-bottom:0.75rem;"><strong style="color:var(--text-primary);">Data stored</strong><br>${top.data}</p>
+      <p style="font-size:0.85rem;margin-bottom:0.75rem;"><strong style="color:var(--text-primary);">Future modules</strong><br>${top.consumers}</p>
+      <p style="font-size:0.85rem;"><strong style="color:var(--text-primary);">Subfolders</strong><br>${(top.children || []).map(c => c.label).join(' · ')}</p>
+    `;
+  }
+}
+
+function filterKbTree(q) {
+  renderKbTree(q);
+}
+
+// Init KB when navigating
+function navTo(page) {
+  document.querySelectorAll('.page-view').forEach(p => p.classList.add('hidden'));
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.remove('hidden');
+  else document.getElementById('page-dashboard').classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navBtn = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if (navBtn) navBtn.classList.add('active');
+  document.getElementById('pageTitle').textContent = pageTitles[page] || page;
+  const right = document.getElementById('rightPanel');
+  if (page === 'dashboard' || page === 'studio') right.style.display = '';
+  else right.style.display = 'none';
+  if (page === 'knowledge') {
+    window._kbActiveCat = null;
+    renderKbTree('');
+  }
+  closeSidebar();
+}
+</script>
+</body>
+</html>
